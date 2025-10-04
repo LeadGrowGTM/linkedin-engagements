@@ -85,7 +85,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 Admin User
               </p>
               <p className="text-xs text-navy-500 dark:text-navy-400 truncate">
-                admin@leadgrow.ai
+                automations@gmail.com
               </p>
             </div>
           </div>
