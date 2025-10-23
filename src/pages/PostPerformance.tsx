@@ -1,17 +1,27 @@
-import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, ExternalLink, TrendingUp, Users, Target, Calendar, FileText } from 'lucide-react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { ArrowLeft, ExternalLink, TrendingUp, Users, Target, Calendar, FileText, MapPin, Building2, Flame, Snowflake, Star } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { usePostPerformance } from '@/hooks/usePostPerformance'
 import { parseLinkedInUsername, formatDate, formatNumber } from '@/lib/utils'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend } from 'recharts'
 
 export default function PostPerformance() {
   const { profileUrl } = useParams<{ profileUrl: string }>()
   const decodedUrl = profileUrl ? decodeURIComponent(profileUrl) : ''
+  const navigate = useNavigate()
   
   const { data, isLoading } = usePostPerformance(decodedUrl)
   const username = parseLinkedInUsername(decodedUrl)
+
+  const COLORS = {
+    hot: '#ef4444',
+    warm: '#f59e0b',
+    cold: '#3b82f6',
+  }
+
+  const PIE_COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981']
 
   if (isLoading) {
     return (
@@ -123,27 +133,249 @@ export default function PostPerformance() {
         </Card>
       </div>
 
-      {/* Info Note */}
-      <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-900">
-        <CardContent className="pt-6">
-          <div className="flex gap-3">
-            <div className="flex-shrink-0 mt-0.5">
-              <svg className="h-5 w-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
+      {/* Analytics Grid */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Lead Quality Distribution */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Lead Quality Distribution</CardTitle>
+            <CardDescription>Breakdown of engagers by lead score</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {data?.leadQuality && (data.leadQuality.hot + data.leadQuality.warm + data.leadQuality.cold) > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Hot Leads', value: data.leadQuality.hot, color: COLORS.hot },
+                      { name: 'Warm Leads', value: data.leadQuality.warm, color: COLORS.warm },
+                      { name: 'Cold Leads', value: data.leadQuality.cold, color: COLORS.cold },
+                    ]}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {[data.leadQuality.hot, data.leadQuality.warm, data.leadQuality.cold].map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={Object.values(COLORS)[index]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-center text-navy-500 py-12">No data available</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Top Industries */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Industries</CardTitle>
+            <CardDescription>Engager distribution by industry</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {data?.industryBreakdown && data.industryBreakdown.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={data.industryBreakdown}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-navy-200 dark:stroke-navy-800" />
+                  <XAxis 
+                    dataKey="name" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    height={100}
+                    className="text-xs fill-navy-600 dark:fill-navy-400"
+                  />
+                  <YAxis className="fill-navy-600 dark:fill-navy-400" />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '6px'
+                    }}
+                  />
+                  <Bar dataKey="value" fill="#3b82f6" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-center text-navy-500 py-12">No industry data available</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Company Size Distribution */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Company Size Distribution</CardTitle>
+            <CardDescription>Engagers by company size</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {data?.companySizeBreakdown && data.companySizeBreakdown.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={data.companySizeBreakdown}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-navy-200 dark:stroke-navy-800" />
+                  <XAxis 
+                    dataKey="name" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    height={100}
+                    className="text-xs fill-navy-600 dark:fill-navy-400"
+                  />
+                  <YAxis className="fill-navy-600 dark:fill-navy-400" />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '6px'
+                    }}
+                  />
+                  <Bar dataKey="value" fill="#8b5cf6" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-center text-navy-500 py-12">No company size data available</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Top Locations */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Locations</CardTitle>
+            <CardDescription>Geographic distribution of engagers</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {data?.locationBreakdown && data.locationBreakdown.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={data.locationBreakdown}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-navy-200 dark:stroke-navy-800" />
+                  <XAxis 
+                    dataKey="name" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    height={100}
+                    className="text-xs fill-navy-600 dark:fill-navy-400"
+                  />
+                  <YAxis className="fill-navy-600 dark:fill-navy-400" />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '6px'
+                    }}
+                  />
+                  <Bar dataKey="value" fill="#10b981" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-center text-navy-500 py-12">No location data available</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Engagement Timeline */}
+      {data?.engagementTimeline && data.engagementTimeline.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Engagement Timeline</CardTitle>
+            <CardDescription>Daily engagement activity (last 30 days)</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={data.engagementTimeline}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-navy-200 dark:stroke-navy-800" />
+                <XAxis 
+                  dataKey="date" 
+                  className="text-xs fill-navy-600 dark:fill-navy-400"
+                  tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                />
+                <YAxis className="fill-navy-600 dark:fill-navy-400" />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '6px'
+                  }}
+                  labelFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                />
+                <Line type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6' }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Top Engagers */}
+      {data?.topEngagers && data.topEngagers.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Engagers by Lead Score</CardTitle>
+            <CardDescription>Your highest-value engagers for this profile</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {data.topEngagers.map((engager) => (
+                <div
+                  key={engager.profile_url}
+                  className="flex items-center justify-between p-4 rounded-lg border border-navy-200 dark:border-navy-800 hover:bg-navy-50 dark:hover:bg-navy-900 transition-colors cursor-pointer"
+                  onClick={() => {
+                    const encodedUrl = encodeURIComponent(engager.profile_url)
+                    navigate(`/engager/${encodedUrl}`)
+                  }}
+                >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center shrink-0">
+                      <span className="text-white font-semibold text-sm">
+                        {engager.full_name?.charAt(0)?.toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-medium text-navy-900 dark:text-navy-50 truncate">
+                          {engager.full_name || 'Unknown'}
+                        </p>
+                        <Badge 
+                          variant={
+                            engager.leadCategory === 'Hot' ? 'destructive' :
+                            engager.leadCategory === 'Warm' ? 'default' : 'secondary'
+                          }
+                        >
+                          {engager.leadCategory === 'Hot' && <Flame className="h-3 w-3 mr-1" />}
+                          {engager.leadCategory === 'Warm' && <Star className="h-3 w-3 mr-1" />}
+                          {engager.leadCategory === 'Cold' && <Snowflake className="h-3 w-3 mr-1" />}
+                          {engager.leadCategory}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-3 mt-1 text-sm text-navy-500 dark:text-navy-400">
+                        {engager.headline && (
+                          <span className="truncate">{engager.headline}</span>
+                        )}
+                        {engager.company_name && (
+                          <span className="flex items-center gap-1">
+                            <Building2 className="h-3 w-3" />
+                            {engager.company_name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="ml-4 text-right shrink-0">
+                    <p className="text-2xl font-bold text-navy-900 dark:text-navy-50">
+                      {engager.leadScore}
+                    </p>
+                    <p className="text-xs text-navy-500 dark:text-navy-400">Score</p>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="flex-1">
-              <h3 className="text-sm font-medium text-blue-900 dark:text-blue-200">
-                Profile-Level Engagement Data
-              </h3>
-              <p className="mt-1 text-sm text-blue-700 dark:text-blue-300">
-                Currently showing all posts for this profile. Per-post engagement tracking requires linking engagers to specific posts in your n8n workflow. 
-                The statistics above show aggregate data across all posts for this profile.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Posts List */}
       <Card>
