@@ -1,11 +1,13 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ExternalLink, TrendingUp, Users, Target, Calendar, FileText, MapPin, Building2, Flame, Snowflake, Star } from 'lucide-react'
+import { ArrowLeft, ExternalLink, TrendingUp, Users, Calendar, FileText, RefreshCw } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { usePostPerformance } from '@/hooks/usePostPerformance'
-import { parseLinkedInUsername, formatDate, formatNumber } from '@/lib/utils'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend } from 'recharts'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { usePostPerformance, useUpdatePostStatus } from '@/hooks/usePostPerformance'
+import { parseLinkedInUsername, formatDate, formatNumber, cn } from '@/lib/utils'
+import { calculateLeadScore, getLeadCategory, getLeadCategoryColor, getLeadCategoryIcon, getLeadCategoryLabel } from '@/lib/leadScoring'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 export default function PostPerformance() {
   const { profileUrl } = useParams<{ profileUrl: string }>()
@@ -13,15 +15,16 @@ export default function PostPerformance() {
   const navigate = useNavigate()
   
   const { data, isLoading } = usePostPerformance(decodedUrl)
+  const updatePostStatus = useUpdatePostStatus()
   const username = parseLinkedInUsername(decodedUrl)
 
-  const COLORS = {
-    hot: '#ef4444',
-    warm: '#f59e0b',
-    cold: '#3b82f6',
+  const handleScrapeAgain = async (postId: number) => {
+    try {
+      await updatePostStatus.mutateAsync({ postId, status: 'PENDING' })
+    } catch (error) {
+      console.error('Error updating post status:', error)
+    }
   }
-
-  const PIE_COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981']
 
   if (isLoading) {
     return (
@@ -54,10 +57,10 @@ export default function PostPerformance() {
           </Link>
           <div>
             <h1 className="text-3xl font-bold text-navy-900 dark:text-navy-50">
-              Post Performance
+              {username}
             </h1>
             <p className="mt-1 text-sm text-navy-500 dark:text-navy-400">
-              Analyzing posts from {username}
+              Post Performance Analytics
             </p>
           </div>
         </div>
@@ -73,7 +76,7 @@ export default function PostPerformance() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-6 md:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
@@ -117,61 +120,19 @@ export default function PostPerformance() {
             </p>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Target className="h-5 w-5" />
-              Avg Lead Score
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-navy-900 dark:text-navy-50">
-              {data?.avgLeadScore || 0}
-            </p>
-          </CardContent>
-        </Card>
       </div>
 
-      {/* Analytics Grid */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Lead Quality Distribution */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Lead Quality Distribution</CardTitle>
-            <CardDescription>Breakdown of engagers by lead score</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {data?.leadQuality && (data.leadQuality.hot + data.leadQuality.warm + data.leadQuality.cold) > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: 'Hot Leads', value: data.leadQuality.hot, color: COLORS.hot },
-                      { name: 'Warm Leads', value: data.leadQuality.warm, color: COLORS.warm },
-                      { name: 'Cold Leads', value: data.leadQuality.cold, color: COLORS.cold },
-                    ]}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {[data.leadQuality.hot, data.leadQuality.warm, data.leadQuality.cold].map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={Object.values(COLORS)[index]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <p className="text-center text-navy-500 py-12">No data available</p>
-            )}
-          </CardContent>
-        </Card>
+      {/* Tabs */}
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="all-engagers">All Engagers</TabsTrigger>
+        </TabsList>
 
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="space-y-6">
+          {/* Analytics Grid */}
+          <div className="grid gap-6 lg:grid-cols-3">
         {/* Top Industries */}
         <Card>
           <CardHeader>
@@ -180,7 +141,7 @@ export default function PostPerformance() {
           </CardHeader>
           <CardContent>
             {data?.industryBreakdown && data.industryBreakdown.length > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
+              <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={data.industryBreakdown}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-navy-200 dark:stroke-navy-800" />
                   <XAxis 
@@ -215,7 +176,7 @@ export default function PostPerformance() {
           </CardHeader>
           <CardContent>
             {data?.companySizeBreakdown && data.companySizeBreakdown.length > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
+              <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={data.companySizeBreakdown}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-navy-200 dark:stroke-navy-800" />
                   <XAxis 
@@ -250,7 +211,7 @@ export default function PostPerformance() {
           </CardHeader>
           <CardContent>
             {data?.locationBreakdown && data.locationBreakdown.length > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
+              <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={data.locationBreakdown}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-navy-200 dark:stroke-navy-800" />
                   <XAxis 
@@ -278,105 +239,6 @@ export default function PostPerformance() {
         </Card>
       </div>
 
-      {/* Engagement Timeline */}
-      {data?.engagementTimeline && data.engagementTimeline.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Engagement Timeline</CardTitle>
-            <CardDescription>Daily engagement activity (last 30 days)</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={data.engagementTimeline}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-navy-200 dark:stroke-navy-800" />
-                <XAxis 
-                  dataKey="date" 
-                  className="text-xs fill-navy-600 dark:fill-navy-400"
-                  tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                />
-                <YAxis className="fill-navy-600 dark:fill-navy-400" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '6px'
-                  }}
-                  labelFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                />
-                <Line type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6' }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Top Engagers */}
-      {data?.topEngagers && data.topEngagers.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Engagers by Lead Score</CardTitle>
-            <CardDescription>Your highest-value engagers for this profile</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {data.topEngagers.map((engager) => (
-                <div
-                  key={engager.profile_url}
-                  className="flex items-center justify-between p-4 rounded-lg border border-navy-200 dark:border-navy-800 hover:bg-navy-50 dark:hover:bg-navy-900 transition-colors cursor-pointer"
-                  onClick={() => {
-                    const encodedUrl = encodeURIComponent(engager.profile_url)
-                    navigate(`/engager/${encodedUrl}`)
-                  }}
-                >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center shrink-0">
-                      <span className="text-white font-semibold text-sm">
-                        {engager.full_name?.charAt(0)?.toUpperCase() || 'U'}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-medium text-navy-900 dark:text-navy-50 truncate">
-                          {engager.full_name || 'Unknown'}
-                        </p>
-                        <Badge 
-                          variant={
-                            engager.leadCategory === 'Hot' ? 'destructive' :
-                            engager.leadCategory === 'Warm' ? 'default' : 'secondary'
-                          }
-                        >
-                          {engager.leadCategory === 'Hot' && <Flame className="h-3 w-3 mr-1" />}
-                          {engager.leadCategory === 'Warm' && <Star className="h-3 w-3 mr-1" />}
-                          {engager.leadCategory === 'Cold' && <Snowflake className="h-3 w-3 mr-1" />}
-                          {engager.leadCategory}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-3 mt-1 text-sm text-navy-500 dark:text-navy-400">
-                        {engager.headline && (
-                          <span className="truncate">{engager.headline}</span>
-                        )}
-                        {engager.company_name && (
-                          <span className="flex items-center gap-1">
-                            <Building2 className="h-3 w-3" />
-                            {engager.company_name}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="ml-4 text-right shrink-0">
-                    <p className="text-2xl font-bold text-navy-900 dark:text-navy-50">
-                      {engager.leadScore}
-                    </p>
-                    <p className="text-xs text-navy-500 dark:text-navy-400">Score</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Posts List */}
       <Card>
         <CardHeader>
@@ -387,43 +249,60 @@ export default function PostPerformance() {
         </CardHeader>
         <CardContent>
           {data?.posts && data.posts.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {data.posts.map((post) => (
                 <div
                   key={post.id}
-                  className="flex items-start justify-between p-4 rounded-lg border border-navy-200 dark:border-navy-800 hover:bg-navy-50 dark:hover:bg-navy-900 transition-colors"
+                  className="flex items-center justify-between p-4 rounded-lg border border-navy-200 dark:border-navy-800 hover:bg-navy-50 dark:hover:bg-navy-900 transition-colors"
                 >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <a
-                        href={post.post_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary-600 dark:text-primary-400 hover:underline font-medium"
-                      >
-                        <ExternalLink className="h-4 w-4 inline mr-1" />
-                        View Post on LinkedIn
-                      </a>
+                  <div className="flex-1 min-w-0 mr-4">
+                    <div className="flex items-center gap-3 flex-wrap mb-1">
                       <Badge
-                        variant={post.status === 'COMPLETED' ? 'success' : 'secondary'}
+                        variant={post.status === 'COMPLETED' ? 'success' : post.status === 'PENDING' ? 'warning' : 'secondary'}
                       >
                         {post.status}
                       </Badge>
                     </div>
+                    {post.post_text && (
+                      <p className="text-sm text-navy-900 dark:text-navy-50 mb-2 line-clamp-2">
+                        {post.post_text}
+                      </p>
+                    )}
                     
-                    <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-navy-500 dark:text-navy-400">
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-navy-500 dark:text-navy-400">
                       {post.posted_at_timestamp && (
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3.5 w-3.5" />
                           Posted: {formatDate(post.posted_at_timestamp)}
-                        </div>
+                        </span>
                       )}
                       {post.created_at && (
-                        <div className="flex items-center gap-1 text-xs">
+                        <span className="flex items-center gap-1">
+                          <FileText className="h-3.5 w-3.5" />
                           Tracked: {formatDate(post.created_at)}
-                        </div>
+                        </span>
                       )}
                     </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(post.post_url, '_blank')}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      View Post
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleScrapeAgain(post.id)}
+                      disabled={updatePostStatus.isPending}
+                    >
+                      <RefreshCw className={cn("h-4 w-4 mr-2", updatePostStatus.isPending && "animate-spin")} />
+                      Scrape Again
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -437,6 +316,136 @@ export default function PostPerformance() {
           )}
         </CardContent>
       </Card>
+        </TabsContent>
+
+        {/* All Engagers Tab */}
+        <TabsContent value="all-engagers">
+          <Card>
+            <CardHeader>
+              <CardTitle>All Engagers</CardTitle>
+              <CardDescription>
+                Complete list of all engagers for this profile ({data?.totalEngagers || 0} total)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {data?.allEngagers && data.allEngagers.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-navy-200 dark:border-navy-800">
+                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
+                          Name
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
+                          Lead Score
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
+                          Headline
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
+                          Company
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
+                          Location
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
+                          Connections
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-navy-200 dark:divide-navy-800">
+                      {data.allEngagers.map((engager) => {
+                        const scoreData = calculateLeadScore({
+                          connections: engager.connections,
+                          followers: engager.followers,
+                          company_size: engager.company_size,
+                          headline: engager.headline,
+                        })
+                        const leadCategory = getLeadCategory(scoreData.totalScore)
+                        
+                        return (
+                          <tr
+                            key={engager.profile_url}
+                            className="transition-colors hover:bg-navy-50 dark:hover:bg-navy-900 cursor-pointer"
+                            onClick={() => {
+                              const encodedUrl = encodeURIComponent(engager.profile_url)
+                              navigate(`/engager/${encodedUrl}`)
+                            }}
+                          >
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center">
+                                  <span className="text-white font-semibold">
+                                    {engager.full_name?.charAt(0).toUpperCase() || 'U'}
+                                  </span>
+                                </div>
+                                <div>
+                                  <div className="text-sm font-medium text-navy-900 dark:text-navy-50">
+                                    {engager.full_name || 'Unknown'}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  className={cn(
+                                    'font-semibold',
+                                    getLeadCategoryColor(leadCategory)
+                                  )}
+                                >
+                                  <span className="mr-1">
+                                    {getLeadCategoryIcon(leadCategory)}
+                                  </span>
+                                  {scoreData.totalScore}
+                                </Badge>
+                                <span className="text-xs text-navy-500 dark:text-navy-400">
+                                  {getLeadCategoryLabel(leadCategory)}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-sm text-navy-900 dark:text-navy-50 max-w-xs truncate">
+                                {engager.headline || 'N/A'}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-navy-900 dark:text-navy-50">
+                                {engager.company_name || 'N/A'}
+                              </div>
+                              {engager.company_industry && (
+                                <div className="text-xs text-navy-500 dark:text-navy-400">
+                                  {engager.company_industry}
+                                </div>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-navy-900 dark:text-navy-50">
+                                {engager.location || 'N/A'}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-navy-900 dark:text-navy-50">
+                                {engager.connections ? formatNumber(engager.connections) : 'N/A'}
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-navy-500 dark:text-navy-400">
+                    No engagers found for this profile yet.
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

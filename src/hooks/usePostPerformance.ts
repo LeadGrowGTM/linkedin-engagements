@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { calculateLeadScore } from '@/lib/leadScoring'
 
@@ -86,10 +86,12 @@ export function usePostPerformance(profileUrl: string) {
         cold: engagersWithScores.filter(e => e.leadCategory === 'Cold').length,
       }
 
-      // Top engagers by lead score
-      const topEngagers = engagersWithScores
+      // Sort all engagers by lead score
+      const sortedEngagers = engagersWithScores
         .sort((a, b) => b.leadScore - a.leadScore)
-        .slice(0, 10)
+      
+      // Top engagers by lead score (for the overview cards)
+      const topEngagers = sortedEngagers.slice(0, 10)
 
       // Engagement timeline (last 30 days)
       const timelineMap = new Map<string, number>()
@@ -119,8 +121,30 @@ export function usePostPerformance(profileUrl: string) {
         locationBreakdown,
         leadQuality,
         topEngagers,
+        allEngagers: sortedEngagers,
         engagementTimeline,
       }
+    },
+  })
+}
+
+export function useUpdatePostStatus() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ postId, status }: { postId: number; status: string }) => {
+      const { data, error } = await supabase
+        .from('linkedin_posts')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('id', postId)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['post-performance'] })
     },
   })
 }

@@ -1,0 +1,404 @@
+{
+  "name": "LinkedIn Monitoring Part 2",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/apimaestro~linkedin-post-reactions/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n\"post_url\": \"{{ $json.post_url }}\",\n    \"reaction_type\": \"ALL\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -192,
+        -80
+      ],
+      "id": "508fb9dc-0e8f-44a1-b668-4bf733377dc1",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "NEmaBEKih7MY1hRT",
+          "name": "Apify"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://lglinkedinscraper.up.railway.app/comments",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"postUrl\": \"{{ $json.post_url }}\"\n  }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -192,
+        96
+      ],
+      "id": "e62fb890-e4a2-439a-977a-1a34e36d74eb",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        32,
+        48
+      ],
+      "id": "847ddd51-66a9-4cad-ba99-78b99dfc2097",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const uniqueProfiles = new Map();\nconst allItems = $input.all();\n\n// --- NEW: Get the 'parent' value from the \"If1\" node ---\n// This safely gets the 'parent' field from the *first* item of the node \"If1\".\n// If \"If1\" has no items, or 'parent' doesn't exist, it defaults to null.\nconst parentValue = $('If1').first().json.profile_url || null;\n\n// Helper function to process and add a profile to our map\nconst addOrUpdateProfile = (profileUrl, contactInfo, engagement) => {\n  if (!profileUrl) {\n    // Skip if the profile URL is null or invalid (e.g., private profiles)\n    return;\n  }\n\n  if (!uniqueProfiles.has(profileUrl)) {\n    // If we haven't seen this person before, create a new entry\n    uniqueProfiles.set(profileUrl, {\n      contact: contactInfo,\n      engagements: [] // Start with an empty list of engagements\n    });\n  }\n\n  // Get the person's record\n  const existingProfile = uniqueProfiles.get(profileUrl);\n\n  // --- IMPROVEMENT: More generic contact info merging ---\n  // This loop will update any field in 'contact' (like headline, urn, etc.)\n  // if the new data has it and the existing record doesn't.\n  for (const key in contactInfo) {\n    if (contactInfo[key] && !existingProfile.contact[key]) {\n      existingProfile.contact[key] = contactInfo[key];\n    }\n  }\n  // --- END IMPROVEMENT ---\n\n  // Add the new engagement to this person's record\n  if (engagement) {\n    existingProfile.engagements.push(engagement);\n  }\n};\n\n// Loop through all incoming items from the Merge node\nfor (const item of allItems) {\n  // --- Part 1: Process Reactors (Likers) ---\n  if (item.json.reactor && item.json.reactor.profile_url) {\n    const reactor = item.json.reactor;\n    const profileUrl = reactor.profile_url;\n\n    const contactInfo = {\n      name: reactor.name,\n      headline: reactor.headline,\n      profileUrl: profileUrl,\n      urn: reactor.urn || null\n    };\n\n    const engagement = {\n      type: 'reaction',\n      value: item.json.reaction_type || 'UNKNOWN' // e.g., 'LIKE'\n    };\n\n    addOrUpdateProfile(profileUrl, contactInfo, engagement);\n  }\n\n  // --- Part 2: Process Commenters ---\n  else if (item.json.comments && Array.isArray(item.json.comments)) {\n    for (const comment of item.json.comments) {\n      if (comment.author && comment.author.profileUrl) {\n        const author = comment.author;\n        const profileUrl = author.profileUrl;\n\n        const contactInfo = {\n          name: author.name,\n          headline: null, // Commenter API doesn't provide a headline\n          profileUrl: profileUrl,\n          urn: author.urn || null\n        };\n\n        const engagement = {\n          type: 'comment',\n          value: comment.text || '' // The actual text of the comment\n        };\n        \n        addOrUpdateProfile(profileUrl, contactInfo, engagement);\n      }\n    }\n  }\n}\n\n// Convert the Map's values into an array\nconst finalProfiles = Array.from(uniqueProfiles.values());\n\n// --- NEW: Map over the results to add the 'parent' value to each ---\nreturn finalProfiles.map(profile => {\n  return {\n    parent: parentValue, // Add the new field here\n    ...profile         // Spread the existing { contact, engagements }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        48
+      ],
+      "id": "0d548ea1-d481-4d1f-8515-935595d5032f",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 3
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1312,
+        144
+      ],
+      "id": "9b64fba9-4bc8-4b9a-952a-955bfda2e350",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedinengagements",
+        "operation": "getAll",
+        "tableId": "linkedin_posts",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "PROCESSING"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1088,
+        144
+      ],
+      "id": "3abd97de-ace3-4dba-9e98-446dec491bb3",
+      "name": "Get many rows",
+      "credentials": {
+        "supabaseApi": {
+          "id": "RaFzxSiA3fPLOhEZ",
+          "name": "LGSupabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedinengagements",
+        "operation": "update",
+        "tableId": "linkedin_posts",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_url",
+              "condition": "eq",
+              "keyValue": "={{ $json.post_url }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "PROCESSING"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        48
+      ],
+      "id": "8a452bfe-4ad6-4cc7-8f22-c11f05e97f6f",
+      "name": "Update a row",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "RaFzxSiA3fPLOhEZ",
+          "name": "LGSupabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -864,
+        144
+      ],
+      "id": "559f4e1a-9a8e-438e-bbd8-0a8a5fcbc6c5",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e7dadbb5-609d-4bcc-b5df-823688f4e39e",
+              "leftValue": "={{ (new Date().getTime() - new Date($json.posted_at_timestamp).getTime()) / (1000 * 60 * 60) }}\n",
+              "rightValue": 48,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            },
+            {
+              "id": "fdf3e8c1-7e88-4b54-b0a4-e695bd0fa64d",
+              "leftValue": "={{ (new Date().getTime() - new Date($json.posted_at_timestamp).getTime()) / (1000 * 60 * 60) }}\n",
+              "rightValue": 120,
+              "operator": {
+                "type": "number",
+                "operation": "lte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -640,
+        48
+      ],
+      "id": "282db01c-0ef3-4a50-a48d-64c5ae95cb71",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "QKduGi3nfof0SPEb",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/QKduGi3nfof0SPEb",
+          "cachedResultName": "Linkedin Monitoring Part 3"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {}
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -640,
+        -176
+      ],
+      "id": "ae1a3e43-cb57-4589-a13a-bc007a3ca4bf",
+      "name": "Call 'Linkedin Monitoring Part 3'"
+    }
+  ],
+  "pinData": {
+    "Schedule Trigger": [
+      {
+        "json": {
+          "timestamp": "2025-10-21T00:00:46.009-04:00",
+          "Readable date": "October 21st 2025, 12:00:46 am",
+          "Readable time": "12:00:46 am",
+          "Day of week": "Tuesday",
+          "Year": "2025",
+          "Month": "October",
+          "Day of month": "21",
+          "Hour": "00",
+          "Minute": "00",
+          "Second": "46",
+          "Timezone": "America/New_York (UTC-04:00)"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "Call 'Linkedin Monitoring Part 3'",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Update a row",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a row": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cba78ddc-f87e-40c5-bf43-32231392fa36",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "37274c1b58dbebdf1f71be091550e19ea24e97234b5394a167d9b4dc2d7949cb"
+  },
+  "id": "SbGVwZvXOc4nyfdz",
+  "tags": []
+}

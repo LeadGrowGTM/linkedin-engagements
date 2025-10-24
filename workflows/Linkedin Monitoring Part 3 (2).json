@@ -1,0 +1,2224 @@
+{
+  "name": "Linkedin Monitoring Part 3",
+  "nodes": [
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedinengagements",
+        "operation": "get",
+        "tableId": "enriched_profiles",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "full_name",
+              "keyValue": "={{ $json.fullName }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        272,
+        64
+      ],
+      "id": "47ea04ae-e65a-49ce-9b99-ce855fbc4f5b",
+      "name": "Get a row",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "RaFzxSiA3fPLOhEZ",
+          "name": "LGSupabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "63cc29c9-b440-4036-a1cd-6d92fe974fdd",
+              "leftValue": "={{ $json.profile_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "f7b12fb5-8490-4559-970a-2e12b578b37f",
+              "leftValue": "={{ $('Merge1').item.json.profileUrl }}",
+              "rightValue": "={{ $('Loop Over Items').item.json.parent }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        496,
+        64
+      ],
+      "id": "e6c3489e-2559-444e-80f5-10511ea4d1d9",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedinengagements",
+        "tableId": "enriched_profiles",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "profile_url",
+              "fieldValue": "={{ $('Merge1').item.json.profileUrl }}"
+            },
+            {
+              "fieldId": "first_name",
+              "fieldValue": "={{ $('Merge1').item.json.firstName }}"
+            },
+            {
+              "fieldId": "last_name",
+              "fieldValue": "={{ $('Merge1').item.json.lastName }}"
+            },
+            {
+              "fieldId": "full_name",
+              "fieldValue": "={{ $('Merge1').item.json.fullName }}"
+            },
+            {
+              "fieldId": "headline",
+              "fieldValue": "={{ $('Merge1').item.json.headline }}"
+            },
+            {
+              "fieldId": "company_name",
+              "fieldValue": "={{ $('Merge1').item.json.company_name }}"
+            },
+            {
+              "fieldId": "company_linkedin_url",
+              "fieldValue": "={{ $('Merge1').item.json.company_linkedin_url }}"
+            },
+            {
+              "fieldId": "company_website",
+              "fieldValue": "={{ $('Merge1').item.json.company_website }}"
+            },
+            {
+              "fieldId": "company_size",
+              "fieldValue": "={{ $('Merge1').item.json.company_size }}"
+            },
+            {
+              "fieldId": "company_industry",
+              "fieldValue": "={{ $('Merge1').item.json.company_industry }}"
+            },
+            {
+              "fieldId": "location",
+              "fieldValue": "={{ $('Merge1').item.json.location }}"
+            },
+            {
+              "fieldId": "connections",
+              "fieldValue": "={{ $('Merge1').item.json.connections }}"
+            },
+            {
+              "fieldId": "followers",
+              "fieldValue": "={{ $('Merge1').item.json.followers }}"
+            },
+            {
+              "fieldId": "skills",
+              "fieldValue": "={{ $('Merge1').item.json.skills }}"
+            },
+            {
+              "fieldId": "public_identifier",
+              "fieldValue": "={{ $('Merge1').item.json.publicIdentifier }}"
+            },
+            {
+              "fieldId": "totalTenureMonths",
+              "fieldValue": "={{ $('Merge1').item.json.totalTenureMonths }}"
+            },
+            {
+              "fieldId": "totalTenureDays",
+              "fieldValue": "={{ $('Merge1').item.json.totalTenureDays }}"
+            },
+            {
+              "fieldId": "urn",
+              "fieldValue": "={{ $('Merge1').item.json.urn }}"
+            },
+            {
+              "fieldId": "updates",
+              "fieldValue": "={{ $('Merge1').item.json.updates }}"
+            },
+            {
+              "fieldId": "experience",
+              "fieldValue": "={{ $('Merge1').item.json.experiences }}"
+            },
+            {
+              "fieldId": "about",
+              "fieldValue": "={{ $('Merge1').item.json.about }}"
+            },
+            {
+              "fieldId": "experience",
+              "fieldValue": "={{ $('Merge1').item.json.experiences }}"
+            },
+            {
+              "fieldId": "educations",
+              "fieldValue": "={{ $('Merge1').item.json.educations }}"
+            },
+            {
+              "fieldId": "licenseAndCertificates",
+              "fieldValue": "={{ $('Merge1').item.json.licenseAndCertificates }}"
+            },
+            {
+              "fieldId": "honorsAndAwards",
+              "fieldValue": "={{ $('Merge1').item.json.honorsAndAwards }}"
+            },
+            {
+              "fieldId": "languages",
+              "fieldValue": "={{ $('Merge1').item.json.languages }}"
+            },
+            {
+              "fieldId": "volunteerAndAwards",
+              "fieldValue": "={{ $('Merge1').item.json.volunteerAndAwards }}"
+            },
+            {
+              "fieldId": "organizations",
+              "fieldValue": "={{ $('Merge1').item.json.organizations }}"
+            },
+            {
+              "fieldId": "skills",
+              "fieldValue": "={{ $('Merge1').item.json.skills }}"
+            },
+            {
+              "fieldId": "parent_profile",
+              "fieldValue": "={{ $('Loop Over Items').item.json.parent }}"
+            },
+            {
+              "fieldId": "engagement_type",
+              "fieldValue": "={{ $('Loop Over Items').item.json.engagements[0].type }}"
+            },
+            {
+              "fieldId": "engagement_value",
+              "fieldValue": "={{ $('Loop Over Items').item.json.engagements[0].value }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        768,
+        48
+      ],
+      "id": "ac4292c0-15c0-42df-93ea-b93ef8a88562",
+      "name": "Create a row",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "RaFzxSiA3fPLOhEZ",
+          "name": "LGSupabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -624,
+        144
+      ],
+      "id": "243d1dd1-b6cd-4dc7-866f-5b6b663e1828",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.leadmagic.io/profile-search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"profile_url\": \"{{ $json.basic_info.profile_url }}\"\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -96,
+        48
+      ],
+      "id": "60bb1423-ba8c-4c8d-918a-65d78d5630fb",
+      "name": "HTTP Request2",
+      "retryOnFail": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "caF0A0XEFJAvc2uM",
+          "name": "Lead Magic"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0dd8bf83-638d-4538-959f-75e4b6e71545",
+              "leftValue": "={{ $json.engagements[0].type }}",
+              "rightValue": "reaction",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -400,
+        80
+      ],
+      "id": "82bf8bd9-3ac0-4209-8552-f1c95f47ded2",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.leadmagic.io/profile-search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"profile_url\": \"{{ $json.contact.profileUrl }}\"\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -96,
+        176
+      ],
+      "id": "31a8ca7f-7087-49f5-93d7-f5676d3b2545",
+      "name": "HTTP Request3",
+      "retryOnFail": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "caF0A0XEFJAvc2uM",
+          "name": "Lead Magic"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        112,
+        48
+      ],
+      "id": "aea8ac23-3904-4ea9-953b-369ca633c2b0",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/apimaestro~linkedin-profile-detail/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"includeEmail\": true,\n    \"username\": \"{{ $json.contact.urn }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -240,
+        32
+      ],
+      "id": "0351ebe9-aaa2-4261-b1f9-49c88cbe9e5f",
+      "name": "HTTP Request4",
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "NEmaBEKih7MY1hRT",
+          "name": "Apify"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1568,
+        272
+      ],
+      "id": "4eba1700-33f0-42ea-a366-670e0eaa1e22",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "65b73cc0-cbb8-4616-b55c-416bd4656e31",
+              "leftValue": "={{ $json.engagements }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1376,
+        272
+      ],
+      "id": "82b82d5a-2891-4ae2-9800-54697adf64c3",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -608,
+        288
+      ],
+      "id": "9e052fb4-5eeb-4d3b-979d-bc061423294b",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedinengagements",
+        "operation": "get",
+        "tableId": "linkedin_posts",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_url",
+              "keyValue": "={{ $json.post_url }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        304
+      ],
+      "id": "8e15f733-73ee-48ea-8ab9-8abd884f11a2",
+      "name": "Get a row1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "RaFzxSiA3fPLOhEZ",
+          "name": "LGSupabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedinengagements",
+        "operation": "get",
+        "tableId": "enriched_profiles",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "urn",
+              "keyValue": "={{ $json.contact.urn }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        48
+      ],
+      "id": "2471c298-57be-4ed0-9292-0329e1da324f",
+      "name": "Get a row2",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "RaFzxSiA3fPLOhEZ",
+          "name": "LGSupabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "urn",
+              "field2": "contact.urn"
+            }
+          ]
+        },
+        "joinMode": "keepNonMatches",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1024,
+        128
+      ],
+      "id": "0f9fcec1-994a-4a12-9cb6-a66c1c7e2ea8",
+      "name": "Merge"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        208
+      ],
+      "id": "6b203b92-5d54-40f1-afc5-9d9d994d2e40",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c2291f41-993c-47ec-8fbf-2d852528eb50",
+              "leftValue": "={{ $json.contact.name }}",
+              "rightValue": "Mitchell Keller",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "2ee77f64-6fb7-4cd3-b4e8-fa8d50e5ae82",
+              "leftValue": "={{ $json.contact.name }}",
+              "rightValue": "Alexa Grabell",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -816,
+        128
+      ],
+      "id": "99738c37-c305-42d5-ae3e-daf4d8b6fe3e",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedinengagements",
+        "operation": "update",
+        "tableId": "linkedin_posts",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "PROCESSED - 1"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        304
+      ],
+      "id": "4ee0a515-c41c-4741-aeba-bad1dfce82bf",
+      "name": "Update a row",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "RaFzxSiA3fPLOhEZ",
+          "name": "LGSupabase"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        528
+      ],
+      "id": "91dea05e-fd8d-4615-89ce-39a68aa6c330",
+      "name": "No Operation, do nothing1"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/alexagrabell/",
+          "contact": {
+            "name": "Parth Thaker",
+            "headline": "Head of Sales at Pocus",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAF7VwIB39MSowVIqeslfE6DNC1cgv-5AxA",
+            "urn": "ACoAAAF7VwIB39MSowVIqeslfE6DNC1cgv-5AxA"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "PRAISE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/alexagrabell/",
+          "contact": {
+            "name": "Julien Alexander Cerutti",
+            "headline": "GTM Architecture & Execution | Driving $500M+ SaaS Growth with AI-Powered Sales & CS | Next-Gen GTM Mindset",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAMYO3EBuDjVsYqM8jqrL_VdaOfQxcBt9zY",
+            "urn": "ACoAAAMYO3EBuDjVsYqM8jqrL_VdaOfQxcBt9zY"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/alexagrabell/",
+          "contact": {
+            "name": "Hayley Jones",
+            "headline": "Customer Success @ Pocus 🔮",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAVRx5wBZH6SkZ0108otMADTjVi0oVpFfH8",
+            "urn": "ACoAAAVRx5wBZH6SkZ0108otMADTjVi0oVpFfH8"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/alexagrabell/",
+          "contact": {
+            "name": "Jared (Kaufman) Moray-Wolf",
+            "headline": "Head of BizOps at Pocus 🔮",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABOgFkYBcHSZQk5ld1Wx0WtkUu898rWGFmw",
+            "urn": "ACoAABOgFkYBcHSZQk5ld1Wx0WtkUu898rWGFmw"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/alexagrabell/",
+          "contact": {
+            "name": "Aniruddha L.",
+            "headline": "Engineering @ Pocus",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAK_o54BdsNP9SQQdkkw1AoDMt7K43o1TlY",
+            "urn": "ACoAAAK_o54BdsNP9SQQdkkw1AoDMt7K43o1TlY"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/alexagrabell/",
+          "contact": {
+            "name": "Matin Y.",
+            "headline": "Growth @ Pocus 🔮",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABxGJqgBv4Lv2Mbo1nbNkumhVVGx8T2kauE",
+            "urn": "ACoAABxGJqgBv4Lv2Mbo1nbNkumhVVGx8T2kauE"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "PRAISE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "id": 24,
+          "post_url": "https://www.linkedin.com/posts/alexagrabell_pocus-sdrs-have-been-making-hilarious-tiktoks-activity-7384964551408156673-V_Ql?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAAGANV1cBuoPkGTpSk-egFHntS8nA2Lpk4KA",
+          "profile_url": "https://www.linkedin.com/in/alexagrabell/",
+          "posted_at_timestamp": "2025-10-17T16:52:35+00:00",
+          "status": "PROCESSING",
+          "created_at": "2025-10-22T04:00:18.438889+00:00",
+          "updated_at": "2025-10-22T04:00:18.438889+00:00"
+        }
+      },
+      {
+        "json": {
+          "id": 12,
+          "post_url": "https://www.linkedin.com/posts/mitchell-keller_funding-information-is-so-important-and-activity-7382472039820996609-z6BR?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAAF_vYyQB-5mIQwdVuoDKDDI5oOF0cHmXgQ4",
+          "profile_url": "https://www.linkedin.com/in/mitchell-keller/",
+          "posted_at_timestamp": "2025-10-10T10:48:13+00:00",
+          "status": "PROCESSING",
+          "created_at": "2025-10-16T04:00:15.348012+00:00",
+          "updated_at": "2025-10-16T04:00:15.348012+00:00"
+        }
+      },
+      {
+        "json": {
+          "id": 13,
+          "post_url": "https://www.linkedin.com/posts/mitchell-keller_if-you-run-recruitment-operations-i-need-activity-7382222426946007040-Oyos?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAAF_vYyQB-5mIQwdVuoDKDDI5oOF0cHmXgQ4",
+          "profile_url": "https://www.linkedin.com/in/mitchell-keller/",
+          "posted_at_timestamp": "2025-10-09T18:16:21+00:00",
+          "status": "PROCESSING",
+          "created_at": "2025-10-16T04:00:15.568762+00:00",
+          "updated_at": "2025-10-16T04:00:15.568762+00:00"
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Nnabuike Okoroafor",
+            "headline": "Reach your dream clients | Campaign mgmt @ Playbook Systems",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADM6l6EBaeEk30U2J4igle40v8B2Q3-LCIQ",
+            "urn": "ACoAADM6l6EBaeEk30U2J4igle40v8B2Q3-LCIQ"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Yegor Drahel",
+            "headline": "Priority Client Manager @ FINPR Agency | Public Relations, Client Relations",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADHqgk0Bks3DaBU7IWI55Vc8Q_lODEXilEI",
+            "urn": "ACoAADHqgk0Bks3DaBU7IWI55Vc8Q_lODEXilEI"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "EMPATHY"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Eli Raterta",
+            "headline": "Turning good offers into closed deals—without paid ads. If you’re tired of cold outreach that goes nowhere, DM me.",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADiCPtQB0jAeYTt2pzb66c0VKbOiLQL8iGc",
+            "urn": "ACoAADiCPtQB0jAeYTt2pzb66c0VKbOiLQL8iGc"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "EMPATHY"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Charles Adriel Del Rosario",
+            "headline": "Full Stack Developer | AI Engineer | Automations Engineer | Electronics Engineer",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADIJkN0BYqk83TIQdMbvhVYAfZYNBVIDMrQ",
+            "urn": "ACoAADIJkN0BYqk83TIQdMbvhVYAfZYNBVIDMrQ"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "EMPATHY"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Momin Vayani",
+            "headline": "Co-Founder MT Digital Marketing Agency | I Don’t Sell Promises — I Build What Works ⚙️ | Meta Ads & Shopify Expert | Web & App Project Manager | Scaling Startups & Brands That Want Real Growth — Not Fluff",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAFvMxAsBpR-Yt0JoZBHqnk1w7Mzjo3avd_w",
+            "urn": "ACoAAFvMxAsBpR-Yt0JoZBHqnk1w7Mzjo3avd_w"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Resul Almyradov",
+            "headline": "GTM @ Multiplai Tech | AI Powered People + Solutions",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADDQadoBkyl3nderbJmHfRJkS8Hj1Lp6HFg",
+            "urn": "ACoAADDQadoBkyl3nderbJmHfRJkS8Hj1Lp6HFg"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Faizan Tariq",
+            "headline": "Chief Sales Officer @ Voltic Inc & Primaryinbox | Lead Generation, Revenue Growth",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADincvsBL4UztqO7FHwRLxkNA1IRuM4loGg",
+            "urn": "ACoAADincvsBL4UztqO7FHwRLxkNA1IRuM4loGg"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Sue Melone",
+            "headline": "I help leaders and teams maximize talent. Leader. Coach. Veteran. Entrepreneur.",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAAsPb4BUJbR--eJWA5k5DA2ChpPHIyfej4",
+            "urn": "ACoAAAAsPb4BUJbR--eJWA5k5DA2ChpPHIyfej4"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Ayaan Rahman",
+            "headline": "We build AI-powered outbound engines for recruiting teams — delivering consistent lead flow so you can focus on billing, not prospecting.",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAEJYeOoB6Y-2gAAYKV5xW5MXGBauZYVJ3RM",
+            "urn": "ACoAAEJYeOoB6Y-2gAAYKV5xW5MXGBauZYVJ3RM"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Andreas Wernicke",
+            "headline": "Custom GTM Systems, shipped",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAgP3CwB04vP9_y1dDgXSK1O98quC03qbCo",
+            "urn": "ACoAAAgP3CwB04vP9_y1dDgXSK1O98quC03qbCo"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Christopher Harvey",
+            "headline": "Founder @ leadlypro.io // The only outbound agency delivering meeting-ready B2B leads to your inbox without any retainer BS",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABSCm4wB2Y32k8RZt6bHtoOYceKWX1hIcco",
+            "urn": "ACoAABSCm4wB2Y32k8RZt6bHtoOYceKWX1hIcco"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Ramesh Kumar",
+            "headline": "Skysenders.ai Founder | Ex-Smartlead Founding Engineer | Building Next-Gen Cold Email Infrastructure & Deliverability",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABU-NjgB-wH9O33JsmQCHzCqz8XeQxImTH0",
+            "urn": "ACoAABU-NjgB-wH9O33JsmQCHzCqz8XeQxImTH0"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Manav Makhija",
+            "headline": "Reach 100% of Your TAM in 90 Days | 3,000+ Enterprise Conversations Generated | Ex-VC, Ex-Hedge Fund",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAD328yoBaR8cHqn_xnrh2Byl_lXqcHHnl4E",
+            "urn": "ACoAAD328yoBaR8cHqn_xnrh2Byl_lXqcHHnl4E"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "RAHUL RANJAN VERMA",
+            "headline": "Senior Multi-Body Dynamics Engineer at Tata Technologies Limited",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAB-idzcBj0g93EZ7HANHAbWQDkV7RMIfvlI",
+            "urn": "ACoAAB-idzcBj0g93EZ7HANHAbWQDkV7RMIfvlI"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Hoani Taylor",
+            "headline": "Cold Email + Personalised Video = Leads",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAB474RQBjoG1aOKFAgW9sL5KARagXKnKKFE",
+            "urn": "ACoAAB474RQBjoG1aOKFAgW9sL5KARagXKnKKFE"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "PRAISE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Bilal Khurram",
+            "headline": "GTM Engineer @ MediaLab",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABSKrUUBfXmizdkzGqrui5fg9OsEttSwlQU",
+            "urn": "ACoAABSKrUUBfXmizdkzGqrui5fg9OsEttSwlQU"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Georgi Furnadzhiev",
+            "headline": "Growth / GTM Lead @ The Growth Syndicate",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADL-V-kBZ5Dd-k90zDpKft0ia3Qr36MFn1M",
+            "urn": "ACoAADL-V-kBZ5Dd-k90zDpKft0ia3Qr36MFn1M"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Nikolaos Malamis",
+            "headline": "B2B Cold Email Expert | GTM Engineer @ LeadGrow.ai",
+            "profileUrl": "https://www.linkedin.com/in/ACoAACJNCTsBTDuq_nfrsoLsM3OeHPi2RCTMfW4",
+            "urn": "ACoAACJNCTsBTDuq_nfrsoLsM3OeHPi2RCTMfW4"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "EMPATHY"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "MohammedAbrar K.",
+            "headline": "Aspiring GTM | Learning Clay, Apollo, Apify | Passionate about Lead Generation Automation *Looking for work as GTMe*",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAC0UVOMBHkiVlIhgBJW9v0aIwbHpKGxdYI0",
+            "urn": "ACoAAC0UVOMBHkiVlIhgBJW9v0aIwbHpKGxdYI0"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Keegan Moody",
+            "headline": "Go-To-Market Engineer | One Time 4 Your MIND |",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADDyCxABBklt9pYvpjTsQn7RTGKgCZZXcD8",
+            "urn": "ACoAADDyCxABBklt9pYvpjTsQn7RTGKgCZZXcD8"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Dylan Bond 👨‍💻",
+            "headline": "I help agencies post on LinkedIn (270+ calls generated for clients)",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAFFDKgABHeE-lJbN5vOJfuT0dRQca5DOr44",
+            "urn": "ACoAAFFDKgABHeE-lJbN5vOJfuT0dRQca5DOr44"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Moaaz Mazhry",
+            "headline": "I Build Revenue Engines with AI Automation & GTM Engineering",
+            "profileUrl": "https://www.linkedin.com/in/ACoAACfhOFIB_UMlinzjqZ2-Clsi7b4CFcRM8Q4",
+            "urn": "ACoAACfhOFIB_UMlinzjqZ2-Clsi7b4CFcRM8Q4"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "George Rekouts",
+            "headline": "CEO Discolike.com | Search Target Accounts with Entire-Web data. Try us!",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAAJsqMB7euMEkd3ayUt3d_IsNT10LzKeLo",
+            "urn": "ACoAAAAJsqMB7euMEkd3ayUt3d_IsNT10LzKeLo"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Moeed Azam",
+            "headline": "Business Analyst | Consultant | Business Developer | AI Automations",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAA_gCgABTchhAgE3LS_fQ8zSUL6eT9GGBI4",
+            "urn": "ACoAAA_gCgABTchhAgE3LS_fQ8zSUL6eT9GGBI4"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Gafar Akinkunmi",
+            "headline": "GTM Engineer @HTA | Defining Web Native TAM @ ListFlux",
+            "profileUrl": "https://www.linkedin.com/in/ACoAACa1FuUBF6XlLUd13_IuPWNq90Xwjka5zyo",
+            "urn": "ACoAACa1FuUBF6XlLUd13_IuPWNq90Xwjka5zyo"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "PRAISE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Bala ~",
+            "headline": "At Vujis ai, I help importers, exporters, and manufacturers eliminate guesswork by helping them target the right buyers and suppliers.",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAFUj7JABZxu_9lVFGavlhggNGyYVzg4fhgE",
+            "urn": "ACoAAFUj7JABZxu_9lVFGavlhggNGyYVzg4fhgE"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Nishkarsh Agarwal",
+            "headline": "GTM Engineer/Architect & Automation Specialist",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAD0KbhQBIrhHcOhSAKKkwt1i789peW9Ejms",
+            "urn": "ACoAAD0KbhQBIrhHcOhSAKKkwt1i789peW9Ejms"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Will Breton",
+            "headline": "Head of GTM at RevGrowth",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADJvSxgBdHs7SsFJwa5D31cR4Nln1JSe5YE",
+            "urn": "ACoAADJvSxgBdHs7SsFJwa5D31cR4Nln1JSe5YE"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Rashi Agarwal",
+            "headline": "Clay.com | GTM Engineer| Unlock Growth With Verified Data & B2B Lead Gen | Founder @TheDataDeeds",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADxK-DoBDGJCz5Z_2kzTwpB7YffyZYoZvY0",
+            "urn": "ACoAADxK-DoBDGJCz5Z_2kzTwpB7YffyZYoZvY0"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "EMPATHY"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Gilbert Bagaoisan",
+            "headline": "Product Designer and startup Guy",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAAyPyYBd3vxxcsdCHtmuVwSx03CmEqg_B8",
+            "urn": "ACoAAAAyPyYBd3vxxcsdCHtmuVwSx03CmEqg_B8"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Kellen Casebeer",
+            "headline": "Helping companies find Message-Market-Fit | Founder @ The Deal Lab | Smartlead Certified Partner | Clay Certified Expert",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABusnpABTh_8asVVMbMZKoJGP6RK238_MTA",
+            "urn": "ACoAABusnpABTh_8asVVMbMZKoJGP6RK238_MTA"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Saad Zia",
+            "headline": "Finding Message-Market-Fit @ The Deal Lab",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADDXOr0BTkWJdVoJqTcE0lXf06OX_vHXzg8",
+            "urn": "ACoAADDXOr0BTkWJdVoJqTcE0lXf06OX_vHXzg8"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "EMPATHY"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Muhammad Shamoon 🚀",
+            "headline": "GTM Engineer | I help B2B SaaS companies generate 300% more qualified leads through Clay workflows, LinkedIn Outreach, Cold Emails, SEO & AI-powered outbound systems 🧪",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAClK5Y0Bg7Z5s8FTa69_qCenAfHKLWV1d4o",
+            "urn": "ACoAAClK5Y0Bg7Z5s8FTa69_qCenAfHKLWV1d4o"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "EMPATHY"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "David Jovanovic",
+            "headline": "Helping B2B Companies Scale Through Cold Outbound | Founder @ 300Growth",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAETZEYcB4EAP9Ud_rcG-sm2DxN7YnEiyqO8",
+            "urn": "ACoAAETZEYcB4EAP9Ud_rcG-sm2DxN7YnEiyqO8"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "PRAISE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "EmailBison",
+            "headline": "573 followers",
+            "profileUrl": "https://www.linkedin.com/company/emailbison/",
+            "urn": null
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "APPRECIATION"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Nico Marino",
+            "headline": "Building relationships since ‘93 | Growth Consultant | CC01",
+            "profileUrl": "https://www.linkedin.com/in/ACoAACCMeicBmKt1XmK_hkN87DqUXuZoWHZbmvg",
+            "urn": "ACoAACCMeicBmKt1XmK_hkN87DqUXuZoWHZbmvg"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "PRAISE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "🦬 Felipe Aranguiz",
+            "headline": "CRO @ EmailBison.com | Email Deliverability Veteran",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABhXka0B3vUeYaK85qifPEZFu3R8vSgQwv0",
+            "urn": "ACoAABhXka0B3vUeYaK85qifPEZFu3R8vSgQwv0"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "EMPATHY"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Fenil Suchak",
+            "headline": "CEO & Co-Founder @ OpenFunnel (YC F24)",
+            "profileUrl": "https://www.linkedin.com/in/ACoAACA4xj0B8rKGyKWxtWJrl1m2lyo93Ef0gOQ",
+            "urn": "ACoAACA4xj0B8rKGyKWxtWJrl1m2lyo93Ef0gOQ"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Mitchell Keller",
+            "headline": null,
+            "profileUrl": "https://ca.linkedin.com/in/mitchell-keller?trk=public_post_follow-view-profile",
+            "urn": null
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "https://youtu.be/u-DxAMB89gs more on this idea\n"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Manav Makhija",
+            "headline": null,
+            "profileUrl": "https://www.linkedin.com/in/manav-makhija?trk=public_post_comment_actor-name",
+            "urn": null
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "As a thought exercise, how would you do this for an example company, say Clay?"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Rashi Agarwal",
+            "headline": null,
+            "profileUrl": "https://in.linkedin.com/in/dataexpert-rashi-agarwal-dataannotation-imagelabeling-b2b-leadgeneration?trk=public_post_comment_actor-name",
+            "urn": null
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "Mitchell Keller that being said we are fortunate enough to have a mentor like you who puts so much effort in training people and believing in them...."
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Nico Marino",
+            "headline": null,
+            "profileUrl": "https://www.linkedin.com/in/nicholasnicomarino?trk=public_post_comment_actor-name",
+            "urn": null
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "man your clients are so lucky to have your team supporting their gtm motions... "
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Gafar Akinkunmi",
+            "headline": null,
+            "profileUrl": "https://fr.linkedin.com/in/gafar?trk=public_post_comment_actor-name",
+            "urn": null
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "Wow! Insane results 🙌 🙌 "
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Muhammad Shamoon 🚀",
+            "headline": null,
+            "profileUrl": "https://pk.linkedin.com/in/muhammad-shamoon-younus?trk=public_post_comment_actor-name",
+            "urn": null
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "Insane results man!"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "🦬 Felipe Aranguiz",
+            "headline": null,
+            "profileUrl": "https://cl.linkedin.com/in/felipearanguiz?trk=public_post_comment_actor-name",
+            "urn": null
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "Beautiful results! Thanks for trusting EmailBison"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Christopher Harvey",
+            "headline": null,
+            "profileUrl": "https://www.linkedin.com/in/christopher-booth-%F0%9F%A7%99-216072127?trk=public_post-text",
+            "urn": null
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "that's a good strategy to win over the prospect easily."
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Keegan Moody",
+            "headline": "Go-To-Market Engineer | One Time 4 Your MIND |",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADDyCxABBklt9pYvpjTsQn7RTGKgCZZXcD8",
+            "urn": "ACoAADDyCxABBklt9pYvpjTsQn7RTGKgCZZXcD8"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Christian Plascencia",
+            "headline": "Co-Founder @ RevGrowth | GTM Systems That Drive Revenue",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADk150wBiizQU0iw182IpaBOfbhXZXZ4tSw",
+            "urn": "ACoAADk150wBiizQU0iw182IpaBOfbhXZXZ4tSw"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Leigha (but spooky) 🐰",
+            "headline": "marketing for today’s internet 💫 content strategist @ Influent 💭 former President 😏",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAB8uIQMBLQ90_GtV4_8TYIRwtsPnIUh-5aY",
+            "urn": "ACoAAB8uIQMBLQ90_GtV4_8TYIRwtsPnIUh-5aY"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Segun Otulana",
+            "headline": "Cold email strategist for B2B SaaS & Search Funds | 10%+ Response Rates | 3X more meetings booked",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADjitX0Bd4gFEdcFiHvSR-lqnSOIZQo_z1o",
+            "urn": "ACoAADjitX0Bd4gFEdcFiHvSR-lqnSOIZQo_z1o"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "INTEREST"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Adam Andrewjeski",
+            "headline": "Give your sales team rocket fuel w/ Clay & AI 🚀 Founder at Stellar 💫 Outbound Architect | Clay Partner + Bootcamp Mentor 🥾",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABOLMYsBHXFHlB4AchMlWe2GM4jqtezsLUg",
+            "urn": "ACoAABOLMYsBHXFHlB4AchMlWe2GM4jqtezsLUg"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Alamin Islam",
+            "headline": "Triple-Verified Email & Mobile Number Leads | Data Enrichment | Cold Email Outreach & Mail-Box Infrastructures Set-Up | LinkedIn Outreach | B2B Lead Generation | Founder & CEO @ FindAnyLead LLC",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADIWKDgByxqQtS3M7cp3f6SROZKyFhJMS20",
+            "urn": "ACoAADIWKDgByxqQtS3M7cp3f6SROZKyFhJMS20"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Dawood Khan",
+            "headline": "Outbound Expert | Turning Cold Outreach into Predictable Revenue",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAF4SOi4BDGhex3Z400TeeoyvCDx2lbi_aJ4",
+            "urn": "ACoAAF4SOi4BDGhex3Z400TeeoyvCDx2lbi_aJ4"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Rashi Agarwal",
+            "headline": "Clay.com | GTM Engineer| Unlock Growth With Verified Data & B2B Lead Gen | Founder @TheDataDeeds",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADxK-DoBDGJCz5Z_2kzTwpB7YffyZYoZvY0",
+            "urn": "ACoAADxK-DoBDGJCz5Z_2kzTwpB7YffyZYoZvY0"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Sambhav Mutreja",
+            "headline": "GTM Engineer at Lead Catalyst | Scaling B2B Companies with Qualified Leads on Demand with a Pay-for-Performance Model",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAE3h5ZkBa-q17vJlxvNrQzVtiLzp4lSvg9M",
+            "urn": "ACoAAE3h5ZkBa-q17vJlxvNrQzVtiLzp4lSvg9M"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Harish V.",
+            "headline": "Customer Success",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABWYLAMBlo9Xv1WxQergN5cdbgRkN_CNoiU",
+            "urn": "ACoAABWYLAMBlo9Xv1WxQergN5cdbgRkN_CNoiU"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Ruadhán Ó Cúláin",
+            "headline": "CEO @ ClayMate || Certified Clay Expert || Unlimited Clay tables... ⚙️",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADzXRmgBpVPQ2U6X8LvtCTkOOb6VF4yx3DY",
+            "urn": "ACoAADzXRmgBpVPQ2U6X8LvtCTkOOb6VF4yx3DY"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Dvin Malekian",
+            "headline": "Helping businesses find Message-Market-Fit using GTM systems | Founder @ Warmleads.io",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADMrpiMBkZCJlKYwNNknK-A-Bt26SsFoBe4",
+            "urn": "ACoAADMrpiMBkZCJlKYwNNknK-A-Bt26SsFoBe4"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Shubhangi Sharma",
+            "headline": "Outbound lead generation for B2B SaaS and Agencies",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAD8bw7wBRm2jCAyK7d5Maln1flX01Im31rI",
+            "urn": "ACoAAD8bw7wBRm2jCAyK7d5Maln1flX01Im31rI"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Jacob Dietle",
+            "headline": "🟠 I architect GTM Operating Systems | Data & Context Engineering for GTM",
+            "profileUrl": "https://www.linkedin.com/in/ACoAACX7hvwBpoTbThdnLIwUeRJUsURVqFQsNQ8",
+            "urn": "ACoAACX7hvwBpoTbThdnLIwUeRJUsURVqFQsNQ8"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Bivek raj Shakya",
+            "headline": "GTME & Automations | Member @ GTM Nepal",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADZNKH0BoUU7gacuYbvg3JiwPC_lK1t0zd4",
+            "urn": "ACoAADZNKH0BoUU7gacuYbvg3JiwPC_lK1t0zd4"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "EMPATHY"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Georgi Furnadzhiev",
+            "headline": "Growth / GTM Lead @ The Growth Syndicate",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADL-V-kBZ5Dd-k90zDpKft0ia3Qr36MFn1M",
+            "urn": "ACoAADL-V-kBZ5Dd-k90zDpKft0ia3Qr36MFn1M"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Moaaz Mazhry",
+            "headline": "I Build Revenue Engines with AI Automation & GTM Engineering",
+            "profileUrl": "https://www.linkedin.com/in/ACoAACfhOFIB_UMlinzjqZ2-Clsi7b4CFcRM8Q4",
+            "urn": "ACoAACfhOFIB_UMlinzjqZ2-Clsi7b4CFcRM8Q4"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Anuj Patel",
+            "headline": "GTM Engineer | Clay Engineer | I help B2B companies build Clay workflows | AI automation | Clay Creator",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADSivgwB25W6RCYQyo38059IM8mVo0iQijw",
+            "urn": "ACoAADSivgwB25W6RCYQyo38059IM8mVo0iQijw"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Willy Hernandez",
+            "headline": "Clay & Make Certified. 8yr automation/integration expert. Ex-Make, MuleSoft/Salesforce, Jitterbit.",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAA0-5DsBTwga2j4gSZya8b5zVn8U2qp1UJI",
+            "urn": "ACoAAA0-5DsBTwga2j4gSZya8b5zVn8U2qp1UJI"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "INTEREST"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Allahyar Memon",
+            "headline": "CEO @ StealthGrow & InboxedUp | Revenue infrastructure you own. High-quality SMTP you control.",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAnzisMBdsfvESSTRjpGIHEiC9S2Oa2nJWY",
+            "urn": "ACoAAAnzisMBdsfvESSTRjpGIHEiC9S2Oa2nJWY"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "INTEREST"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Cody Smith",
+            "headline": "Founder at EmailGuard & EmailBison",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAFO_wDcBgfm9CuUFiwplJNTB2SeBeB0TVvo",
+            "urn": "ACoAAFO_wDcBgfm9CuUFiwplJNTB2SeBeB0TVvo"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Fedor Levikov",
+            "headline": "I help B2B startups & scale ups turn cold outreach into qualified pipeline",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAZeeMIBpYMdNuwGEwbv5LFI-TZclZiIphA",
+            "urn": "ACoAAAZeeMIBpYMdNuwGEwbv5LFI-TZclZiIphA"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Chris March",
+            "headline": "Executive Coach & Former COO | Helping Directors & VPs Lead Bigger with Clarity, Influence & Results — Leadership Advisor & Speaker | Follow for Leadership Strategies",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAARTa9gBmJ3iIDbdLWTmH4GHsAcKA7FGRLo",
+            "urn": "ACoAAARTa9gBmJ3iIDbdLWTmH4GHsAcKA7FGRLo"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "EMPATHY"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/mitchell-keller/",
+          "contact": {
+            "name": "Steve McKinney",
+            "headline": "Bring Proactive Agility™ to Your Organization: Turn Uncertainty into Advantage.",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAAZ-8UBMfL815b1ioCHRBB978ZaiRfehKU",
+            "urn": "ACoAAAAZ-8UBMfL815b1ioCHRBB978ZaiRfehKU"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "EMPATHY"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Get a row": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Get a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Get a row2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a row2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a row1": {
+      "main": [
+        [
+          {
+            "node": "Update a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a row": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1f5f0a8c-f256-4c84-804e-139d2e6990e9",
+  "meta": {
+    "instanceId": "37274c1b58dbebdf1f71be091550e19ea24e97234b5394a167d9b4dc2d7949cb"
+  },
+  "id": "QKduGi3nfof0SPEb",
+  "tags": []
+}

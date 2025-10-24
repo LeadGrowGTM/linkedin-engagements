@@ -9,6 +9,26 @@ export type Json =
 export interface Database {
   linkedinengagements: {
     Tables: {
+      categories: {
+        Row: {
+          id: number
+          name: string
+          color: string
+          created_at: string | null
+        }
+        Insert: {
+          id?: number
+          name: string
+          color?: string
+          created_at?: string | null
+        }
+        Update: {
+          id?: number
+          name?: string
+          color?: string
+          created_at?: string | null
+        }
+      }
       linkedin_profiles: {
         Row: {
           id: number
@@ -16,6 +36,9 @@ export interface Database {
           is_enabled: boolean | null
           created_at: string | null
           Webhook: string | null
+          webhooks: Json | null
+          description: string | null
+          category: string | null
         }
         Insert: {
           id?: number
@@ -23,6 +46,9 @@ export interface Database {
           is_enabled?: boolean | null
           created_at?: string | null
           Webhook?: string | null
+          webhooks?: Json | null
+          description?: string | null
+          category?: string | null
         }
         Update: {
           id?: number
@@ -30,12 +56,16 @@ export interface Database {
           is_enabled?: boolean | null
           created_at?: string | null
           Webhook?: string | null
+          webhooks?: Json | null
+          description?: string | null
+          category?: string | null
         }
       }
       linkedin_posts: {
         Row: {
           id: number
           post_url: string
+          post_text: string | null
           profile_url: string | null
           posted_at_timestamp: string | null
           status: string | null
@@ -45,6 +75,7 @@ export interface Database {
         Insert: {
           id?: number
           post_url: string
+          post_text?: string | null
           profile_url?: string | null
           posted_at_timestamp?: string | null
           status?: string | null
@@ -54,6 +85,7 @@ export interface Database {
         Update: {
           id?: number
           post_url?: string
+          post_text?: string | null
           profile_url?: string | null
           posted_at_timestamp?: string | null
           status?: string | null
