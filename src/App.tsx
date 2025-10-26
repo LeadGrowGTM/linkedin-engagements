@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard'
 import Analytics from './pages/Analytics'
 import Profiles from './pages/Profiles'
 import Posts from './pages/Posts'
+import KeywordSearch from './pages/KeywordSearch'
 import Settings from './pages/Settings'
 import PostPerformance from './pages/PostPerformance'
 import EngagerDetail from './pages/EngagerDetail'
@@ -32,6 +33,7 @@ function App() {
               <Route path="analytics" element={<Analytics />} />
               <Route path="profiles" element={<Profiles />} />
               <Route path="posts" element={<Posts />} />
+              <Route path="keyword-search" element={<KeywordSearch />} />
               <Route path="profiles/:profileUrl/posts" element={<PostPerformance />} />
               <Route path="engagers/:profileUrl" element={<EngagerDetail />} />
               <Route path="settings" element={<Settings />} />

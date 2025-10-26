@@ -7,7 +7,6 @@ import {
   useLocationDistribution,
   useSkillsDistribution,
   useEngagementTrends,
-  useLeadQualityDistribution,
   useEngagementPatterns,
 } from '@/hooks/useAnalytics'
 import { TimeRange } from '@/hooks/useDashboard'
@@ -26,7 +25,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
-import { TrendingUp, Building2, MapPin, Award, Target, Activity } from 'lucide-react'
+import { TrendingUp, Building2, MapPin, Award, Activity } from 'lucide-react'
 
 const COLORS = ['#0ea5e9', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444', '#6366f1', '#14b8a6']
 
@@ -45,7 +44,6 @@ export default function Analytics() {
   const { data: locationData, isLoading: locationLoading } = useLocationDistribution(timeRange)
   const { data: skillsData, isLoading: skillsLoading } = useSkillsDistribution(timeRange)
   const { data: trendsData, isLoading: trendsLoading } = useEngagementTrends(timeRange)
-  const { data: qualityData, isLoading: qualityLoading } = useLeadQualityDistribution(timeRange)
   const { data: patternsData, isLoading: patternsLoading } = useEngagementPatterns()
 
   return (
@@ -73,46 +71,6 @@ export default function Analytics() {
           ))}
         </div>
       </div>
-
-      {/* Lead Quality Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5" />
-            Lead Quality Distribution
-          </CardTitle>
-          <CardDescription>
-            Average lead score: {qualityData?.averageScore || 0}/100 across {qualityData?.totalLeads || 0} leads
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {qualityLoading ? (
-            <div className="h-64 flex items-center justify-center">
-              <p className="text-navy-500">Loading...</p>
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={qualityData?.distribution || []}
-                  dataKey="count"
-                  nameKey="category"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  label={(entry) => `${entry.category}: ${entry.count}`}
-                >
-                  {(qualityData?.distribution || []).map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          )}
-        </CardContent>
-      </Card>
 
       {/* Engagement Trends */}
       <Card>

@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { calculateLeadScore } from '@/lib/leadScoring'
 
 export function usePostPerformance(profileUrl: string) {
   return useQuery({
@@ -24,25 +23,6 @@ export function usePostPerformance(profileUrl: string) {
       if (engagersError) throw engagersError
 
       const allEngagers = engagers || []
-
-      // Calculate lead scores and categorize engagers
-      const engagersWithScores = allEngagers.map(engager => {
-        const scoreComponents = calculateLeadScore({
-          connections: engager.connections,
-          followers: engager.followers,
-          company_size: engager.company_size,
-          headline: engager.headline,
-        })
-        return {
-          ...engager,
-          leadScore: scoreComponents.totalScore,
-          leadCategory: scoreComponents.totalScore >= 70 ? 'Hot' : scoreComponents.totalScore >= 40 ? 'Warm' : 'Cold'
-        }
-      })
-
-      // Calculate average lead score
-      const totalScore = engagersWithScores.reduce((sum, e) => sum + e.leadScore, 0)
-      const avgLeadScore = allEngagers.length > 0 ? Math.round(totalScore / allEngagers.length) : 0
 
       // Industry breakdown
       const industryMap = new Map<string, number>()
@@ -79,18 +59,11 @@ export function usePostPerformance(profileUrl: string) {
         .sort((a, b) => b.value - a.value)
         .slice(0, 5)
 
-      // Lead quality distribution
-      const leadQuality = {
-        hot: engagersWithScores.filter(e => e.leadCategory === 'Hot').length,
-        warm: engagersWithScores.filter(e => e.leadCategory === 'Warm').length,
-        cold: engagersWithScores.filter(e => e.leadCategory === 'Cold').length,
-      }
-
-      // Sort all engagers by lead score
-      const sortedEngagers = engagersWithScores
-        .sort((a, b) => b.leadScore - a.leadScore)
+      // Sort all engagers by connections (or recent engagement)
+      const sortedEngagers = allEngagers
+        .sort((a, b) => (b.connections || 0) - (a.connections || 0))
       
-      // Top engagers by lead score (for the overview cards)
+      // Top engagers by connections (for the overview cards)
       const topEngagers = sortedEngagers.slice(0, 10)
 
       // Engagement timeline (last 30 days)
@@ -115,11 +88,9 @@ export function usePostPerformance(profileUrl: string) {
         posts: postsData,
         totalEngagers: allEngagers.length,
         totalPosts: posts?.length || 0,
-        avgLeadScore,
         industryBreakdown,
         companySizeBreakdown,
         locationBreakdown,
-        leadQuality,
         topEngagers,
         allEngagers: sortedEngagers,
         engagementTimeline,

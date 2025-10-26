@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { Database } from '@/types/database'
 
-type Post = Database['linkedinengagements']['Tables']['linkedin_posts']['Row']
+type Post = Database['linkedin']['Tables']['linkedin_posts']['Row']
 
 export function useAllPosts() {
   return useQuery({

@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { calculateLeadScore, getLeadCategoryColor, getLeadCategoryIcon, getLeadCategoryLabel } from '@/lib/leadScoring'
 import { formatDate } from '@/lib/utils'
 
 export default function EngagerDetail() {
@@ -60,15 +59,6 @@ export default function EngagerDetail() {
     )
   }
 
-  const scoreComponents = calculateLeadScore({
-    connections: engager.connections,
-    followers: engager.followers,
-    company_size: engager.company_size,
-    headline: engager.headline,
-  })
-
-  const leadCategory = scoreComponents.totalScore >= 70 ? 'hot' : scoreComponents.totalScore >= 40 ? 'warm' : 'cold'
-
   // Parse experience data
   const experiences = Array.isArray(engager.experience) ? engager.experience : []
   const educations = Array.isArray(engager.educations) ? engager.educations : []
@@ -103,21 +93,13 @@ export default function EngagerDetail() {
               {engager.full_name?.charAt(0).toUpperCase() || '?'}
             </div>
             <div className="flex-1">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h1 className="text-3xl font-bold text-navy-900 dark:text-navy-50">
-                    {engager.full_name || engager.first_name || 'Unknown'}
-                  </h1>
-                  <p className="mt-2 text-lg text-navy-600 dark:text-navy-300">
-                    {engager.headline || 'No headline'}
-                  </p>
-                </div>
-                <Badge
-                  className={getLeadCategoryColor(leadCategory)}
-                >
-                  <span className="mr-1">{getLeadCategoryIcon(leadCategory)}</span>
-                  {scoreComponents.totalScore} - {getLeadCategoryLabel(leadCategory)}
-                </Badge>
+              <div>
+                <h1 className="text-3xl font-bold text-navy-900 dark:text-navy-50">
+                  {engager.full_name || engager.first_name || 'Unknown'}
+                </h1>
+                <p className="mt-2 text-lg text-navy-600 dark:text-navy-300">
+                  {engager.headline || 'No headline'}
+                </p>
               </div>
 
               <div className="mt-4 flex flex-wrap gap-4">

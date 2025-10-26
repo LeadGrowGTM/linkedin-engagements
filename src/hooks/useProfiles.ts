@@ -2,9 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { Database } from '@/types/database'
 
-type Profile = Database['linkedinengagements']['Tables']['linkedin_profiles']['Row']
-type ProfileInsert = Database['linkedinengagements']['Tables']['linkedin_profiles']['Insert']
-type ProfileUpdate = Database['linkedinengagements']['Tables']['linkedin_profiles']['Update']
+type Profile = Database['linkedin']['Tables']['linkedin_profiles']['Row']
+type ProfileInsert = Database['linkedin']['Tables']['linkedin_profiles']['Insert']
+type ProfileUpdate = Database['linkedin']['Tables']['linkedin_profiles']['Update']
 
 export function useProfiles() {
   return useQuery({

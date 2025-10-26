@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Users, Settings, X, BarChart3, FileText } from 'lucide-react'
+import { LayoutDashboard, Users, Settings, X, BarChart3, FileText, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navigation = [
@@ -7,6 +7,7 @@ const navigation = [
   { name: 'Analytics', to: '/analytics', icon: BarChart3 },
   { name: 'Profiles', to: '/profiles', icon: Users },
   { name: 'Posts', to: '/posts', icon: FileText },
+  { name: 'Keyword Search', to: '/keyword-search', icon: Search },
   { name: 'Settings', to: '/settings', icon: Settings },
 ]
 

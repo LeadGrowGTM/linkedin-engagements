@@ -2,9 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { Database } from '@/types/database'
 
-type Category = Database['linkedinengagements']['Tables']['categories']['Row']
-type CategoryInsert = Database['linkedinengagements']['Tables']['categories']['Insert']
-type CategoryUpdate = Database['linkedinengagements']['Tables']['categories']['Update']
+type Category = Database['linkedin']['Tables']['categories']['Row']
+type CategoryInsert = Database['linkedin']['Tables']['categories']['Insert']
+type CategoryUpdate = Database['linkedin']['Tables']['categories']['Update']
 
 export function useCategories() {
   return useQuery({

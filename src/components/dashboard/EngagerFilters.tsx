@@ -10,8 +10,6 @@ export interface EngagerFilters {
   industry?: string
   location?: string
   companySize?: string
-  minScore?: number
-  maxScore?: number
   headlineKeyword?: string
   parentProfile?: string
 }
@@ -156,45 +154,6 @@ export default function EngagerFilters({
                   </option>
                 ))}
               </select>
-            </div>
-
-            {/* Lead Score Range */}
-            <div>
-              <Label htmlFor="minScore">Min Lead Score</Label>
-              <Input
-                id="minScore"
-                type="number"
-                min="0"
-                max="100"
-                placeholder="0"
-                value={localFilters.minScore || ''}
-                onChange={(e) =>
-                  setLocalFilters({
-                    ...localFilters,
-                    minScore: e.target.value ? parseInt(e.target.value) : undefined,
-                  })
-                }
-                className="mt-1"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="maxScore">Max Lead Score</Label>
-              <Input
-                id="maxScore"
-                type="number"
-                min="0"
-                max="100"
-                placeholder="100"
-                value={localFilters.maxScore || ''}
-                onChange={(e) =>
-                  setLocalFilters({
-                    ...localFilters,
-                    maxScore: e.target.value ? parseInt(e.target.value) : undefined,
-                  })
-                }
-                className="mt-1"
-              />
             </div>
 
             {/* Headline Keyword */}

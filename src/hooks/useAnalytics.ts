@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { calculateLeadScore } from '@/lib/leadScoring'
 import type { TimeRange } from './useDashboard'
 
 export function useIndustryDistribution(timeRange: TimeRange = 30) {
@@ -177,54 +176,6 @@ export function useEngagementTrends(timeRange: TimeRange = 30) {
         .sort((a, b) => a.date.localeCompare(b.date))
 
       return trends
-    },
-  })
-}
-
-export function useLeadQualityDistribution(timeRange: TimeRange = 30) {
-  return useQuery({
-    queryKey: ['lead-quality-distribution', timeRange],
-    queryFn: async () => {
-      const cutoffDate = new Date()
-      cutoffDate.setDate(cutoffDate.getDate() - timeRange)
-
-      const { data, error } = await supabase
-        .from('enriched_profiles')
-        .select('connections, followers, company_size, headline')
-        .gte('created_at', cutoffDate.toISOString())
-
-      if (error) throw error
-
-      // Calculate scores and categorize
-      const categories = { hot: 0, warm: 0, cold: 0 }
-      let totalScore = 0
-
-      ;(data || []).forEach(engager => {
-        const scoreComponents = calculateLeadScore({
-          connections: engager.connections,
-          followers: engager.followers,
-          company_size: engager.company_size,
-          headline: engager.headline,
-        })
-
-        totalScore += scoreComponents.totalScore
-
-        if (scoreComponents.totalScore >= 70) categories.hot++
-        else if (scoreComponents.totalScore >= 40) categories.warm++
-        else categories.cold++
-      })
-
-      const averageScore = data.length > 0 ? Math.round(totalScore / data.length) : 0
-
-      return {
-        distribution: [
-          { category: 'Hot Lead', count: categories.hot, color: '#ef4444' },
-          { category: 'Warm Lead', count: categories.warm, color: '#f97316' },
-          { category: 'Cold Lead', count: categories.cold, color: '#3b82f6' },
-        ],
-        averageScore,
-        totalLeads: data.length,
-      }
     },
   })
 }

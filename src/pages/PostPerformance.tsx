@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { usePostPerformance, useUpdatePostStatus } from '@/hooks/usePostPerformance'
 import { parseLinkedInUsername, formatDate, formatNumber, cn } from '@/lib/utils'
-import { calculateLeadScore, getLeadCategory, getLeadCategoryColor, getLeadCategoryIcon, getLeadCategoryLabel } from '@/lib/leadScoring'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 export default function PostPerformance() {
@@ -337,9 +336,6 @@ export default function PostPerformance() {
                           Name
                         </th>
                         <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
-                          Lead Score
-                        </th>
-                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
                           Headline
                         </th>
                         <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
@@ -355,14 +351,6 @@ export default function PostPerformance() {
                     </thead>
                     <tbody className="divide-y divide-navy-200 dark:divide-navy-800">
                       {data.allEngagers.map((engager) => {
-                        const scoreData = calculateLeadScore({
-                          connections: engager.connections,
-                          followers: engager.followers,
-                          company_size: engager.company_size,
-                          headline: engager.headline,
-                        })
-                        const leadCategory = getLeadCategory(scoreData.totalScore)
-                        
                         return (
                           <tr
                             key={engager.profile_url}
@@ -384,24 +372,6 @@ export default function PostPerformance() {
                                     {engager.full_name || 'Unknown'}
                                   </div>
                                 </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center gap-2">
-                                <Badge
-                                  className={cn(
-                                    'font-semibold',
-                                    getLeadCategoryColor(leadCategory)
-                                  )}
-                                >
-                                  <span className="mr-1">
-                                    {getLeadCategoryIcon(leadCategory)}
-                                  </span>
-                                  {scoreData.totalScore}
-                                </Badge>
-                                <span className="text-xs text-navy-500 dark:text-navy-400">
-                                  {getLeadCategoryLabel(leadCategory)}
-                                </span>
                               </div>
                             </td>
                             <td className="px-6 py-4">

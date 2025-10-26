@@ -9,7 +9,7 @@ if (!supabaseUrl || !supabaseKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   db: {
-    schema: 'linkedinengagements'
+    schema: 'linkedin'
   },
   realtime: {
     params: {

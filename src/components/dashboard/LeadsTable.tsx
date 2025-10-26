@@ -2,13 +2,6 @@ import { Link } from 'react-router-dom'
 import { TrendingUp } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import {
-  getLeadCategoryColor,
-  getLeadCategoryIcon,
-  getLeadCategoryLabel,
-  type LeadCategory,
-} from '@/lib/leadScoring'
-import { cn } from '@/lib/utils'
 
 interface Engager {
   id: string
@@ -24,8 +17,6 @@ interface Engager {
   parentProfile: string | null
   parentProfileUsername: string
   smartTags: string[]
-  leadScore: number
-  leadCategory: LeadCategory
   engagementCount: number
   createdAt: string | null
 }
@@ -70,9 +61,6 @@ export default function EngagersTable({ engagers, isLoading }: EngagersTableProp
                 Full Name
               </th>
               <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
-                Lead Score
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
                 Headline
               </th>
               <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
@@ -115,24 +103,6 @@ export default function EngagersTable({ engagers, isLoading }: EngagersTableProp
                         )}
                       </div>
                     </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      className={cn(
-                        'font-semibold',
-                        getLeadCategoryColor(engager.leadCategory)
-                      )}
-                    >
-                      <span className="mr-1">
-                        {getLeadCategoryIcon(engager.leadCategory)}
-                      </span>
-                      {engager.leadScore}
-                    </Badge>
-                    <span className="text-xs text-navy-500 dark:text-navy-400">
-                      {getLeadCategoryLabel(engager.leadCategory)}
-                    </span>
                   </div>
                 </td>
                 <td className="px-6 py-4">

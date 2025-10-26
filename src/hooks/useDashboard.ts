@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { parseLinkedInUsername } from '@/lib/utils'
-import { calculateLeadScore, getLeadCategory } from '@/lib/leadScoring'
 
 export type TimeRange = 7 | 14 | 30 | 90
 
@@ -98,16 +97,6 @@ export function useEngagersTracked(timeRange: TimeRange = 7) {
           engager.company_size,
         ].filter(Boolean) as string[]
 
-        // Calculate lead score
-        const scoreComponents = calculateLeadScore({
-          connections: engager.connections,
-          followers: engager.followers,
-          company_size: engager.company_size,
-          headline: engager.headline,
-        })
-
-        const leadCategory = getLeadCategory(scoreComponents.totalScore)
-
         // Get engagement count
         const engagementCount = engagementCounts.get(engager.profile_url) || 1
 
@@ -125,15 +114,18 @@ export function useEngagersTracked(timeRange: TimeRange = 7) {
           parentProfile: engager.parent_profile || null,
           parentProfileUsername: parentUsername,
           smartTags: smartTags.slice(0, 3), // Show up to 3 tags
-          leadScore: scoreComponents.totalScore,
-          leadCategory,
           engagementCount,
           createdAt: engager.created_at,
         }
       })
 
-      // Sort by lead score (highest first)
-      return engagersData.sort((a, b) => b.leadScore - a.leadScore)
+      // Sort by engagement count (highest first), then by most recent
+      return engagersData.sort((a, b) => {
+        if (b.engagementCount !== a.engagementCount) {
+          return b.engagementCount - a.engagementCount
+        }
+        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+      })
     },
   })
 }

@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export interface Database {
-  linkedinengagements: {
+  linkedin: {
     Tables: {
       categories: {
         Row: {
@@ -27,6 +27,41 @@ export interface Database {
           name?: string
           color?: string
           created_at?: string | null
+        }
+      }
+      post_engagements: {
+        Row: {
+          id: number
+          engager_profile_url: string
+          post_url: string
+          post_text: string | null
+          monitored_profile_url: string
+          engagement_type: string | null
+          engaged_at: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: number
+          engager_profile_url: string
+          post_url: string
+          post_text?: string | null
+          monitored_profile_url: string
+          engagement_type?: string | null
+          engaged_at?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: number
+          engager_profile_url?: string
+          post_url?: string
+          post_text?: string | null
+          monitored_profile_url?: string
+          engagement_type?: string | null
+          engaged_at?: string | null
+          created_at?: string | null
+          updated_at?: string | null
         }
       }
       linkedin_profiles: {
