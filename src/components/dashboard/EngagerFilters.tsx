@@ -12,6 +12,8 @@ export interface EngagerFilters {
   companySize?: string
   headlineKeyword?: string
   parentProfile?: string
+  minScore?: number
+  maxScore?: number
 }
 
 interface EngagerFiltersProps {

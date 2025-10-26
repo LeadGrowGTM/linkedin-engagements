@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ExternalLink, TrendingUp, Users, Calendar, FileText, RefreshCw } from 'lucide-react'
+import { ArrowLeft, ExternalLink, TrendingUp, Users, Calendar, FileText, RefreshCw, CheckCircle, Clock } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -16,6 +16,21 @@ export default function PostPerformance() {
   const { data, isLoading } = usePostPerformance(decodedUrl)
   const updatePostStatus = useUpdatePostStatus()
   const username = parseLinkedInUsername(decodedUrl)
+
+  const getStatusBadge = (status: string | null) => {
+    switch (status?.toUpperCase()) {
+      case 'COMPLETED':
+        return <Badge variant="success" className="gap-1"><CheckCircle className="h-3 w-3" />Completed</Badge>
+      case 'PROCESSED - 1':
+        return <Badge variant="success" className="gap-1"><CheckCircle className="h-3 w-3" />Processed - 1 time</Badge>
+      case 'PROCESSING':
+        return <Badge variant="warning" className="gap-1"><Clock className="h-3 w-3" />Processing</Badge>
+      case 'PENDING':
+        return <Badge variant="secondary" className="gap-1"><Clock className="h-3 w-3" />Pending</Badge>
+      default:
+        return <Badge variant="secondary">{status || 'Unknown'}</Badge>
+    }
+  }
 
   const handleScrapeAgain = async (postId: number) => {
     try {
@@ -256,11 +271,7 @@ export default function PostPerformance() {
                 >
                   <div className="flex-1 min-w-0 mr-4">
                     <div className="flex items-center gap-3 flex-wrap mb-1">
-                      <Badge
-                        variant={post.status === 'COMPLETED' ? 'success' : post.status === 'PENDING' ? 'warning' : 'secondary'}
-                      >
-                        {post.status}
-                      </Badge>
+                      {getStatusBadge(post.status)}
                     </div>
                     {post.post_text && (
                       <p className="text-sm text-navy-900 dark:text-navy-50 mb-2 line-clamp-2">
