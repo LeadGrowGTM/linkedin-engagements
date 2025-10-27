@@ -194,7 +194,7 @@ export function useEngagementPatterns() {
       // Create day of week × hour heatmap data
       const patterns: { [key: string]: { [key: string]: number } } = {}
       const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-      
+
       // Initialize
       daysOfWeek.forEach(day => {
         patterns[day] = {}
@@ -214,6 +214,122 @@ export function useEngagementPatterns() {
       })
 
       return patterns
+    },
+  })
+}
+
+export function useTopTitles(timeRange: TimeRange = 30) {
+  return useQuery({
+    queryKey: ['top-titles', timeRange],
+    queryFn: async () => {
+      const cutoffDate = new Date()
+      cutoffDate.setDate(cutoffDate.getDate() - timeRange)
+
+      // Check if enriched_profiles has any data with headlines
+      const { error: profilesError } = await supabase
+        .from('enriched_profiles')
+        .select('headline, full_name, company_name')
+        .not('headline', 'is', null)
+        .limit(1)
+
+      if (profilesError) throw profilesError
+
+      // Check recent engagements
+      const { data: recentEngagements, error: engagementError } = await supabase
+        .from('post_engagements')
+        .select('engager_profile_url, engaged_at')
+        .gte('engaged_at', cutoffDate.toISOString())
+        .limit(50)
+
+      if (engagementError) throw engagementError
+
+      // Now try to get enriched profiles for these engager URLs
+      if (recentEngagements && recentEngagements.length > 0) {
+        const engagerUrls = recentEngagements.map(e => e.engager_profile_url)
+
+        const { data: enrichedEngagers, error: enrichError } = await supabase
+          .from('enriched_profiles')
+          .select('profile_url, headline, full_name, company_name, experiences')
+          .in('profile_url', engagerUrls)
+
+        if (enrichError) throw enrichError
+
+        // Count titles using multiple fallback fields
+        const titleCounts = new Map<string, number>()
+
+        ;(enrichedEngagers || []).forEach(profile => {
+          let title = null
+
+          if (profile.headline && profile.headline.trim()) {
+            title = profile.headline
+          } else if (profile.full_name && profile.full_name.trim()) {
+            title = profile.full_name
+          } else if (profile.company_name && profile.company_name.trim()) {
+            title = profile.company_name
+          } else if (profile.experiences && Array.isArray(profile.experiences)) {
+            const currentPosition = profile.experiences.find((exp: any) =>
+              exp.current === true || exp.current === 1 || exp.current === 'true' || exp.current === '1'
+            )
+            if (currentPosition?.title) {
+              title = currentPosition.title
+            }
+          }
+
+          if (title && title.trim()) {
+            const count = titleCounts.get(title) || 0
+            titleCounts.set(title, count + 1)
+          }
+        })
+
+        // Convert to array and sort
+        const distribution = Array.from(titleCounts.entries())
+          .map(([title, count]) => ({ title, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 10)
+
+        return distribution
+      }
+
+      // If no enriched profiles found for engagers, try to get any enriched profiles as fallback
+      const { data: fallbackProfiles, error: fallbackError } = await supabase
+        .from('enriched_profiles')
+        .select('headline, full_name, company_name')
+        .not('headline', 'is', null)
+        .not('full_name', 'is', null)
+        .limit(20)
+
+      if (fallbackError) throw fallbackError
+
+      if (fallbackProfiles && fallbackProfiles.length > 0) {
+        const titleCounts = new Map<string, number>()
+
+        ;(fallbackProfiles || []).forEach(profile => {
+          let title = null
+
+          if (profile.headline && profile.headline.trim()) {
+            title = profile.headline
+          } else if (profile.full_name && profile.full_name.trim()) {
+            title = profile.full_name
+          } else if (profile.company_name && profile.company_name.trim()) {
+            title = profile.company_name
+          }
+
+          if (title && title.trim()) {
+            const count = titleCounts.get(title) || 0
+            titleCounts.set(title, count + 1)
+          }
+        })
+
+        const distribution = Array.from(titleCounts.entries())
+          .map(([title, count]) => ({ title, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 10)
+
+        return distribution
+      }
+
+      // Return empty array if no data found
+      return []
     },
   })
 }

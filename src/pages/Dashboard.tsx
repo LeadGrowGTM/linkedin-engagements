@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Users, FileText, TrendingUp, ExternalLink, BarChart3, CheckCircle, Clock, AlertCircle, RefreshCw, Building2, Award } from 'lucide-react'
+import { Users, FileText, TrendingUp, ExternalLink, BarChart3, CheckCircle, Clock, AlertCircle, RefreshCw, Building2, Award, Briefcase } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useDashboardMetrics, TimeRange } from '@/hooks/useDashboard'
 import { useRealtimeAll } from '@/hooks/useRealtime'
@@ -10,6 +10,7 @@ import {
   useCompanySizeDistribution,
   useSkillsDistribution,
   useEngagementTrends,
+  useTopTitles,
 } from '@/hooks/useAnalytics'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -52,6 +53,7 @@ export default function Dashboard() {
   const { data: companySizeData, isLoading: sizeLoading } = useCompanySizeDistribution(timeRange)
   const { data: skillsData, isLoading: skillsLoading } = useSkillsDistribution(timeRange)
   const { data: trendsData, isLoading: trendsLoading } = useEngagementTrends(timeRange)
+  const { data: titlesData, isLoading: titlesLoading } = useTopTitles(timeRange)
 
   // Calculate sync statistics
   const syncStats = {
@@ -374,41 +376,88 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Top Skills */}
-        <Card className="w-full">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Award className="h-4 w-4" />
-              Top Skills
-            </CardTitle>
-            <CardDescription className="text-sm">
-              Most common skills among engagers
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-0">
-            {skillsLoading ? (
-              <div className="h-56 flex items-center justify-center">
-                <p className="text-navy-500 text-sm">Loading...</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {(skillsData || []).slice(0, 8).map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-2 rounded-md bg-muted/50 border border-border/50"
-                  >
-                    <span className="text-sm font-medium text-foreground truncate">
-                      {item.skill}
-                    </span>
-                    <span className="text-xs font-semibold text-muted-foreground bg-background px-2 py-1 rounded">
-                      {item.count}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {/* Top Skills & Top Titles Row */}
+        <div className="grid gap-4 lg:grid-cols-2">
+          {/* Top Skills */}
+          <Card className="w-full">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Award className="h-4 w-4" />
+                Top Skills
+              </CardTitle>
+              <CardDescription className="text-sm">
+                Most common skills among engagers
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {skillsLoading ? (
+                <div className="h-56 flex items-center justify-center">
+                  <p className="text-navy-500 text-sm">Loading...</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {(skillsData || []).slice(0, 8).map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-2 rounded-md bg-muted/50 border border-border/50"
+                    >
+                      <span className="text-sm font-medium text-foreground truncate">
+                        {item.skill}
+                      </span>
+                      <span className="text-xs font-semibold text-muted-foreground bg-background px-2 py-1 rounded">
+                        {item.count}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Top Titles */}
+          <Card className="w-full">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Briefcase className="h-4 w-4" />
+                Top Titles
+              </CardTitle>
+              <CardDescription className="text-sm">
+                Most common job titles among engagers
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {titlesLoading ? (
+                <div className="h-56 flex items-center justify-center">
+                  <p className="text-navy-500 text-sm">Loading...</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {(titlesData || []).slice(0, 8).map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-2 rounded-md bg-muted/50 border border-border/50"
+                    >
+                      <span className="text-sm font-medium text-foreground truncate">
+                        {item.title}
+                      </span>
+                      <span className="text-xs font-semibold text-muted-foreground bg-background px-2 py-1 rounded">
+                        {item.count}
+                      </span>
+                    </div>
+                  ))}
+                  {(!titlesData || titlesData.length === 0) && (
+                    <div className="h-56 flex items-center justify-center">
+                      <div className="text-center">
+                        <p className="text-navy-500 text-sm mb-2">No engagement data found</p>
+                        <p className="text-navy-400 text-xs">Top Titles will appear once profiles are enriched and engagement data is available.</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Right Sidebar - Monitored Profiles */}
