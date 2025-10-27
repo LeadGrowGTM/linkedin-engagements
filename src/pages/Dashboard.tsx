@@ -470,9 +470,10 @@ export default function Dashboard() {
                           variant="ghost"
                         size="sm"
                         onClick={() => window.open(profile.profile_url, '_blank')}
-                          className="flex-1 h-7 text-xs"
+                          className="flex-1 h-7 text-xs gap-1"
                       >
                           <ExternalLink className="h-3 w-3" />
+                          View Profile
                       </Button>
                       <Button
                         variant="default"
