@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Users, Settings, BarChart3, FileText, Search, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, Users, Settings, FileText, Search, ChevronRight } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -16,7 +16,6 @@ import {
 
 const mainNavigation = [
   { name: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
-  { name: 'Analytics', to: '/analytics', icon: BarChart3 },
   { name: 'Posts', to: '/posts', icon: FileText },
   { name: 'Keyword Search', to: '/keyword-search', icon: Search },
 ]
@@ -40,8 +39,12 @@ export function AppSidebar() {
       <SidebarHeader className="border-b border-navy-200 dark:border-navy-800 bg-gradient-to-br from-navy-50 to-white dark:from-navy-900 dark:to-navy-950">
         <div className="flex h-16 items-center px-4 group-data-[collapsible=icon]:justify-center">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-600 to-primary-800 flex-shrink-0">
-              <span className="text-sm font-bold text-white">LG</span>
+            <div className="flex h-8 w-8 items-center justify-center flex-shrink-0">
+              <img 
+                src="/lgLM_icon.png" 
+                alt="LG Logo" 
+                className="h-8 w-8 object-contain rounded-xl"
+              />
             </div>
             <h1 className="text-lg font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent group-data-[collapsible=icon]:hidden">
               LeadGrow

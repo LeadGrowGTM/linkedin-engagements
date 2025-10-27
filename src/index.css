@@ -13,6 +13,13 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Chart colors - Blue to Dark Blue theme */
+    --chart-1: 202 96% 35%;   /* primary-700 #0369a1 */
+    --chart-2: 205 90% 29%;   /* primary-800 #075985 */
+    --chart-3: 207 85% 24%;   /* primary-900 #0c4a6e */
+    --chart-4: 215 28% 17%;   /* navy-800 #1e293b */
+    --chart-5: 222 47% 11%;   /* navy-900 #0f172a */
   }
   
   * {
@@ -37,12 +44,29 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Chart colors for dark theme - Brighter blue variants */
+    --chart-1: 202 96% 45%;   /* Brighter primary-600 equivalent */
+    --chart-2: 205 90% 39%;   /* Brighter primary-700 equivalent */
+    --chart-3: 207 85% 34%;   /* Brighter primary-800 equivalent */
+    --chart-4: 215 28% 27%;   /* Brighter navy-700 equivalent */
+    --chart-5: 222 47% 21%;   /* Brighter navy-800 equivalent */
   }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .scrollbar-hide {
+    /* Firefox */
+    scrollbar-width: none;
+
+    /* Safari and Chrome */
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 }
 

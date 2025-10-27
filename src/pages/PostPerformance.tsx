@@ -4,6 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { usePostPerformance, useUpdatePostStatus } from '@/hooks/usePostPerformance'
 import { parseLinkedInUsername, formatDate, formatNumber, cn } from '@/lib/utils'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
@@ -339,86 +347,78 @@ export default function PostPerformance() {
             </CardHeader>
             <CardContent>
               {data?.allEngagers && data.allEngagers.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-navy-200 dark:border-navy-800">
-                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
-                          Name
-                        </th>
-                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
-                          Headline
-                        </th>
-                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
-                          Company
-                        </th>
-                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
-                          Location
-                        </th>
-                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
-                          Connections
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-navy-200 dark:divide-navy-800">
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[280px]">Name</TableHead>
+                        <TableHead className="min-w-[200px]">Headline</TableHead>
+                        <TableHead className="w-[200px]">Company</TableHead>
+                        <TableHead className="w-[180px]">Location</TableHead>
+                        <TableHead className="w-[120px] text-right">Connections</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
                       {data.allEngagers.map((engager) => {
                         return (
-                          <tr
+                          <TableRow
                             key={engager.profile_url}
-                            className="transition-colors hover:bg-navy-50 dark:hover:bg-navy-900 cursor-pointer"
+                            className="cursor-pointer hover:bg-muted/50"
                             onClick={() => {
                               const encodedUrl = encodeURIComponent(engager.profile_url)
-                              navigate(`/engager/${encodedUrl}`)
+                              navigate(`/engagers/${encodedUrl}`)
                             }}
                           >
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <TableCell>
                               <div className="flex items-center gap-3">
                                 <div className="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center">
-                                  <span className="text-white font-semibold">
+                                  <span className="text-white font-semibold text-sm">
                                     {engager.full_name?.charAt(0).toUpperCase() || 'U'}
                                   </span>
                                 </div>
                                 <div>
-                                  <div className="text-sm font-medium text-navy-900 dark:text-navy-50">
+                                  <div className="font-medium text-foreground">
                                     {engager.full_name || 'Unknown'}
                                   </div>
                                 </div>
                               </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-sm text-navy-900 dark:text-navy-50 max-w-xs truncate">
+                            </TableCell>
+                            <TableCell className="max-w-[200px]">
+                              <div className="text-sm text-muted-foreground truncate">
                                 {engager.headline || 'N/A'}
                               </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-navy-900 dark:text-navy-50">
-                                {engager.company_name || 'N/A'}
-                              </div>
-                              {engager.company_industry && (
-                                <div className="text-xs text-navy-500 dark:text-navy-400">
-                                  {engager.company_industry}
+                            </TableCell>
+                            <TableCell className="w-[200px]">
+                              <div className="space-y-1">
+                                <div className="text-sm font-medium text-foreground">
+                                  {engager.company_name || 'N/A'}
                                 </div>
-                              )}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-navy-900 dark:text-navy-50">
+                                {engager.company_industry && (
+                                  <div className="text-xs text-muted-foreground">
+                                    {engager.company_industry}
+                                  </div>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell className="w-[180px]">
+                              <div className="text-sm text-muted-foreground">
                                 {engager.location || 'N/A'}
                               </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-navy-900 dark:text-navy-50">
+                            </TableCell>
+                            <TableCell className="w-[120px] text-right">
+                              <div className="text-sm font-medium text-foreground">
                                 {engager.connections ? formatNumber(engager.connections) : 'N/A'}
                               </div>
-                            </td>
-                          </tr>
+                            </TableCell>
+                          </TableRow>
                         )
                       })}
-                    </tbody>
-                  </table>
+                    </TableBody>
+                  </Table>
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <p className="text-navy-500 dark:text-navy-400">
+                  <p className="text-muted-foreground">
                     No engagers found for this profile yet.
                   </p>
                 </div>

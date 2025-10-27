@@ -3,7 +3,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from './contexts/ThemeContext'
 import Layout from './components/layout/Layout'
 import Dashboard from './pages/Dashboard'
-import Analytics from './pages/Analytics'
 import Profiles from './pages/Profiles'
 import Posts from './pages/Posts'
 import KeywordSearch from './pages/KeywordSearch'
@@ -30,7 +29,6 @@ function App() {
             <Route path="/" element={<Layout />}>
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
-              <Route path="analytics" element={<Analytics />} />
               <Route path="profiles" element={<Profiles />} />
               <Route path="posts" element={<Posts />} />
               <Route path="keyword-search" element={<KeywordSearch />} />

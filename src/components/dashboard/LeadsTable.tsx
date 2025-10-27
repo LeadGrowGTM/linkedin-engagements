@@ -2,6 +2,14 @@ import { Link } from 'react-router-dom'
 import { TrendingUp } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 interface Engager {
   id: string
@@ -32,7 +40,7 @@ export default function EngagersTable({ engagers, isLoading }: EngagersTableProp
       <Card className="p-6">
         <div className="animate-pulse space-y-4">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-16 bg-navy-100 dark:bg-navy-800 rounded" />
+            <div key={i} className="h-16 bg-muted rounded" />
           ))}
         </div>
       </Card>
@@ -43,7 +51,7 @@ export default function EngagersTable({ engagers, isLoading }: EngagersTableProp
     return (
       <Card className="p-12">
         <div className="text-center">
-          <p className="text-navy-500 dark:text-navy-400">
+          <p className="text-muted-foreground">
             No engagers found for the selected time period.
           </p>
         </div>
@@ -53,37 +61,24 @@ export default function EngagersTable({ engagers, isLoading }: EngagersTableProp
 
   return (
     <Card>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-navy-200 dark:border-navy-800">
-              <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
-                Full Name
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
-                Headline
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
-                Company
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
-                Smart Tags
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-navy-500 dark:text-navy-400">
-                Engaged With
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-navy-200 dark:divide-navy-800">
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[280px]">Full Name</TableHead>
+              <TableHead className="min-w-[200px]">Headline</TableHead>
+              <TableHead className="w-[180px]">Company</TableHead>
+              <TableHead className="w-[200px]">Smart Tags</TableHead>
+              <TableHead className="w-[150px]">Engaged With</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {engagers.map((engager) => (
-              <tr
-                key={engager.id}
-                className="transition-colors hover:bg-navy-50 dark:hover:bg-navy-900"
-              >
-                <td className="px-6 py-4 whitespace-nowrap">
+              <TableRow key={engager.id} className="hover:bg-muted/50">
+                <TableCell className="w-[280px]">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center">
-                      <span className="text-white font-semibold">
+                      <span className="text-white font-semibold text-sm">
                         {engager.fullName.charAt(0).toUpperCase()}
                       </span>
                     </div>
@@ -91,7 +86,7 @@ export default function EngagersTable({ engagers, isLoading }: EngagersTableProp
                       <div className="flex items-center gap-2">
                         <Link
                           to={`/engagers/${encodeURIComponent(engager.profileUrl)}`}
-                          className="text-sm font-medium text-navy-900 dark:text-navy-50 hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
+                          className="font-medium text-foreground hover:text-primary hover:underline"
                         >
                           {engager.fullName}
                         </Link>
@@ -104,52 +99,52 @@ export default function EngagersTable({ engagers, isLoading }: EngagersTableProp
                       </div>
                     </div>
                   </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="text-sm text-navy-900 dark:text-navy-50 max-w-xs truncate">
+                </TableCell>
+                <TableCell className="min-w-[200px]">
+                  <div className="text-sm text-muted-foreground max-w-[200px] truncate">
                     {engager.headline}
                   </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-navy-900 dark:text-navy-50">
+                </TableCell>
+                <TableCell className="w-[180px]">
+                  <div className="text-sm font-medium text-foreground">
                     {engager.companyName}
                   </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex flex-wrap gap-2">
+                </TableCell>
+                <TableCell className="w-[200px]">
+                  <div className="flex flex-wrap gap-1">
                     {engager.smartTags.length > 0 ? (
                       engager.smartTags.map((tag, index) => (
-                        <Badge key={index} variant="secondary">
+                        <Badge key={index} variant="secondary" className="text-xs">
                           {tag}
                         </Badge>
                       ))
                     ) : (
-                      <span className="text-sm text-navy-400 dark:text-navy-500">
+                      <span className="text-xs text-muted-foreground">
                         No tags
                       </span>
                     )}
                   </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                </TableCell>
+                <TableCell className="w-[150px]">
                   {engager.parentProfile ? (
                     <a
                       href={engager.parentProfile}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+                      className="text-sm text-primary hover:underline"
                     >
                       {engager.parentProfileUsername}
                     </a>
                   ) : (
-                    <span className="text-sm text-navy-400 dark:text-navy-500">
+                    <span className="text-sm text-muted-foreground">
                       N/A
                     </span>
                   )}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </Card>
   )
