@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { Plus, Settings2, Folder } from 'lucide-react'
+import { useState, useMemo, useEffect } from 'react'
+import { Plus, Settings2, Folder, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
@@ -8,12 +8,21 @@ import ManageCategoriesModal from '@/components/profiles/ManageCategoriesModal'
 import ProfileCard from '@/components/profiles/ProfileCard'
 import { useProfileStats } from '@/hooks/useProfiles'
 import { useCategories } from '@/hooks/useCategories'
+import { useTriggerScrapeProfiles } from '@/hooks/useTriggerScrape'
 
 export default function Profiles() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false)
   const { data: profiles, isLoading } = useProfileStats()
   const { data: categories } = useCategories()
+  const { trigger: triggerScrape, isTriggering, result: scrapeResult, clearResult } = useTriggerScrapeProfiles()
+
+  useEffect(() => {
+    if (scrapeResult) {
+      const timer = setTimeout(clearResult, 4000)
+      return () => clearTimeout(timer)
+    }
+  }, [scrapeResult, clearResult])
 
   // Group profiles by category
   const groupedProfiles = useMemo(() => {
@@ -61,7 +70,16 @@ export default function Profiles() {
             Manage LinkedIn profiles organized by category
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          {scrapeResult && (
+            <span className={`text-sm ${scrapeResult.success ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+              {scrapeResult.message}
+            </span>
+          )}
+          <Button variant="outline" onClick={triggerScrape} disabled={isTriggering}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${isTriggering ? 'animate-spin' : ''}`} />
+            {isTriggering ? 'Scraping...' : 'Scrape New Posts'}
+          </Button>
           <Button variant="outline" onClick={() => setIsManageCategoriesOpen(true)}>
             <Settings2 className="mr-2 h-4 w-4" />
             Manage Categories

@@ -1,15 +1,24 @@
-import { useState } from 'react'
-import { RefreshCw, ExternalLink, Calendar, CheckCircle, Clock, AlertCircle } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { RefreshCw, ExternalLink, Calendar, CheckCircle, Clock, AlertCircle, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useAllPosts, useRefreshPosts } from '@/hooks/usePosts'
 import { formatDate, formatNumber, parseLinkedInUsername } from '@/lib/utils'
+import { useTriggerScrapeEngagers } from '@/hooks/useTriggerScrape'
 
 export default function Posts() {
   const { data: posts, isLoading, refetch } = useAllPosts()
   const refreshPosts = useRefreshPosts()
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const { trigger: triggerEngagers, isTriggering, result: engagerResult, clearResult } = useTriggerScrapeEngagers()
+
+  useEffect(() => {
+    if (engagerResult) {
+      const timer = setTimeout(clearResult, 4000)
+      return () => clearTimeout(timer)
+    }
+  }, [engagerResult, clearResult])
 
   const handleRefresh = async () => {
     setIsRefreshing(true)
@@ -65,14 +74,30 @@ export default function Posts() {
             View all posts from monitored LinkedIn profiles
           </p>
         </div>
-        <Button 
-          onClick={handleRefresh} 
-          disabled={isRefreshing || isLoading}
-          className="gap-2"
-        >
-          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          Refresh Posts
-        </Button>
+        <div className="flex items-center gap-2">
+          {engagerResult && (
+            <span className={`text-sm ${engagerResult.success ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+              {engagerResult.message}
+            </span>
+          )}
+          <Button
+            variant="outline"
+            onClick={triggerEngagers}
+            disabled={isTriggering}
+            className="gap-2"
+          >
+            <Zap className={`h-4 w-4 ${isTriggering ? 'animate-pulse' : ''}`} />
+            {isTriggering ? 'Triggering...' : 'Scrape Engagers'}
+          </Button>
+          <Button
+            onClick={handleRefresh}
+            disabled={isRefreshing || isLoading}
+            className="gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh Posts
+          </Button>
+        </div>
       </div>
 
       {/* Stats Overview */}

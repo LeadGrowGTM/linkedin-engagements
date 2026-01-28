@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Moon, Sun, Bell, Database, Tags } from 'lucide-react'
+import { Moon, Sun, Bell, Database, Tags, Webhook } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Input } from '@/components/ui/input'
@@ -9,6 +9,8 @@ import { useTheme } from '@/contexts/ThemeContext'
 
 interface SettingsState {
   defaultWebhook: string
+  scrapePostsWebhook: string
+  scrapeEngagersWebhook: string
   autoEnable: boolean
   refreshInterval: number
   dataRetentionDays: number
@@ -22,6 +24,8 @@ export default function Settings() {
     const saved = localStorage.getItem('app-settings')
     return saved ? JSON.parse(saved) : {
       defaultWebhook: '',
+      scrapePostsWebhook: 'https://lgn8nwebhookv2.up.railway.app/hook/linkedin-scrape-posts',
+      scrapeEngagersWebhook: 'https://lgn8nwebhookv2.up.railway.app/hook/linkedin-scrape-engagers',
       autoEnable: true,
       refreshInterval: 30,
       dataRetentionDays: 90,
@@ -144,6 +148,58 @@ export default function Settings() {
               />
               <p className="mt-1 text-xs text-navy-500 dark:text-navy-400">
                 Default webhook URL for new profiles
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* n8n Workflow Triggers */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Webhook className="h-5 w-5" />
+              n8n Workflow Triggers
+            </CardTitle>
+            <CardDescription>
+              Webhook URLs to manually trigger n8n scraping workflows
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="scrapePostsWebhook">Scrape Posts Webhook (Part 1)</Label>
+              <Input
+                id="scrapePostsWebhook"
+                type="url"
+                placeholder="https://your-n8n-instance.com/webhook/..."
+                value={settings.scrapePostsWebhook}
+                onChange={(e) =>
+                  setSettings({ ...settings, scrapePostsWebhook: e.target.value })
+                }
+                className="mt-1"
+              />
+              <p className="mt-1 text-xs text-navy-500 dark:text-navy-400">
+                Triggers Part 1: scrapes new posts from all enabled profiles
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="scrapeEngagersWebhook">Scrape Engagers Webhook (Part 2)</Label>
+              <Input
+                id="scrapeEngagersWebhook"
+                type="url"
+                placeholder="https://your-n8n-instance.com/webhook/..."
+                value={settings.scrapeEngagersWebhook}
+                onChange={(e) =>
+                  setSettings({ ...settings, scrapeEngagersWebhook: e.target.value })
+                }
+                className="mt-1"
+              />
+              <p className="mt-1 text-xs text-navy-500 dark:text-navy-400">
+                Triggers Part 2: extracts engagers from pending posts
+              </p>
+            </div>
+            <div className="rounded-lg border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950 p-4">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                Add a Webhook trigger node in your n8n workflows and paste the URL here. See docs for setup instructions.
               </p>
             </div>
           </CardContent>
