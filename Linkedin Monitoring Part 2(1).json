@@ -1,0 +1,452 @@
+{
+  "name": "Linkedin Monitoring Part 2",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/harvestapi~linkedin-post-reactions/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"posts\": [\n        \"{{ $json.post_url }}\"\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        448,
+        96
+      ],
+      "id": "cc36bebe-61b3-42ef-ab05-d4a7feddc7cf",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "X2SNlBhkyhTFLi1K",
+          "name": "Apify - Automations@lg"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/harvestapi~linkedin-post-comments/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"posts\": [\n        \"{{ $json.post_url }}\"\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        448,
+        272
+      ],
+      "id": "576a0ef3-91a6-4f41-b8be-334181451556",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "X2SNlBhkyhTFLi1K",
+          "name": "Apify - Automations@lg"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        672,
+        224
+      ],
+      "id": "418d99c8-c1b7-4543-bcee-6b3b33163cff",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const uniqueProfiles = new Map();\nconst allItems = $input.all();\n\n// --- Get the 'parent' value from the \"If1\" node ---\nconst parentValue = $('If1').first().json.profile_url || null;\n\n// --- Get the 'post_url' value from the input ---\n// This logic is still correct and will find the post URL from any item type\nconst firstItemWithPost = allItems.find(item => (item.json.query && item.json.query.post) || item.json.postUrl);\nconst postUrlValue = firstItemWithPost ? (firstItemWithPost.json.query ? firstItemWithPost.json.query.post : firstItemWithPost.json.postUrl) : null;\n\n// Helper function to process and add a profile to our map\nconst addOrUpdateProfile = (profileUrl, contactInfo, engagement) => {\n  if (!profileUrl) {\n    // Skip if the profile URL is null or invalid (e.g., private profiles)\n    return;\n  }\n\n  if (!uniqueProfiles.has(profileUrl)) {\n    // If we haven't seen this person before, create a new entry\n    uniqueProfiles.set(profileUrl, {\n      contact: contactInfo,\n      engagements: [] // Start with an empty list of engagements\n    });\n  }\n\n  // Get the person's record\n  const existingProfile = uniqueProfiles.get(profileUrl);\n\n  // --- Generic contact info merging ---\n  // This loop will update any field in 'contact' (like headline, urn, etc.)\n  // if the new data has it and the existing record doesn't (i.e., it's null).\n  for (const key in contactInfo) {\n    if (contactInfo[key] && !existingProfile.contact[key]) {\n      existingProfile.contact[key] = contactInfo[key];\n    }\n  }\n\n  // Add the new engagement to this person's record\n  if (engagement) {\n    existingProfile.engagements.push(engagement);\n  }\n};\n\n// Loop through all incoming items\nfor (const item of allItems) {\n  const json = item.json; // Use json variable for clarity\n\n  // --- Part 1: Process Reactors (Likers) ---\n  // Check for 'reactionType' as the unique key for reactors\n  if (json.reactionType && json.actor && json.actor.linkedinUrl) {\n    const reactor = json.actor;\n    const profileUrl = reactor.linkedinUrl;\n\n    const contactInfo = {\n      name: reactor.name,\n      headline: reactor.position || null,\n      profileUrl: profileUrl,\n      urn: reactor.id || null\n    };\n\n    const engagement = {\n      type: 'reaction',\n      value: json.reactionType || 'UNKNOWN'\n    };\n\n    addOrUpdateProfile(profileUrl, contactInfo, engagement);\n  }\n\n  // --- NEW: Part 2: Process NEW Comment Items (Top-level) ---\n  // Check for 'commentary' as the unique key for new comment items\n  else if (json.commentary && json.actor && json.actor.linkedinUrl) {\n    const author = json.actor;\n    const profileUrl = author.linkedinUrl;\n\n    const contactInfo = {\n      name: author.name,\n      headline: author.position || null, // New comments have 'position'\n      profileUrl: profileUrl,\n      urn: author.id || null // New comments have 'id'\n    };\n\n    const engagement = {\n      type: 'comment',\n      value: json.commentary || '' // Use 'commentary' for the text\n    };\n    \n    addOrUpdateProfile(profileUrl, contactInfo, engagement);\n    \n    // --- NEW: Process replies within this comment item ---\n    if (json.replies && Array.isArray(json.replies)) {\n      for (const reply of json.replies) {\n        if (reply.actor && reply.actor.linkedinUrl) {\n          const replyAuthor = reply.actor;\n          const replyProfileUrl = replyAuthor.linkedinUrl;\n\n          const replyContactInfo = {\n            name: replyAuthor.name,\n            headline: replyAuthor.position || null,\n            profileUrl: replyProfileUrl,\n            urn: replyAuthor.id || null\n          };\n\n          const replyEngagement = {\n            type: 'comment_reply', // Differentiate it from a base comment\n            value: reply.commentary || ''\n          };\n\n          addOrUpdateProfile(replyProfileUrl, replyContactInfo, replyEngagement);\n        }\n      }\n    }\n  }\n\n  // --- Part 3: Process OLD Comment Items (Array) ---\n  // This is the original logic for the old format (comment containers)\n  else if (json.comments && Array.isArray(json.comments)) {\n    for (const comment of json.comments) {\n      // This check will correctly skip comments where author.profileUrl is null\n      if (comment.author && comment.author.profileUrl) {\n        const author = comment.author;\n        const profileUrl = author.profileUrl;\n\n        const contactInfo = {\n          name: author.name,\n          headline: null, // Old format didn't have headline\n          profileUrl: profileUrl,\n          urn: author.urn || null\n        };\n\n        const engagement = {\n          type: 'comment',\n          value: comment.text || ''\n        };\n        \n        addOrUpdateProfile(profileUrl, contactInfo, engagement);\n      }\n    }\n  }\n}\n\n// Convert the Map's values into an array\nconst finalProfiles = Array.from(uniqueProfiles.values());\n\n// --- Map over the results to add the 'parent' and 'post_url' values ---\nreturn finalProfiles.map(profile => {\n  return {\n    parent: parentValue,     // Add the parent field\n    post_url: postUrlValue, // Add the new post_url field\n    ...profile             // Spread the existing { contact, engagements }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        224
+      ],
+      "id": "fb7b5637-e114-4f9b-8249-d6927a17c858",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -576,
+        320
+      ],
+      "id": "659098a7-4c8d-4fc2-a343-c9e95c22b594",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedin",
+        "operation": "getAll",
+        "tableId": "linkedin_posts",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "PENDING"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        320
+      ],
+      "id": "b8bb4b87-b889-4813-898b-b5f04816b93b",
+      "name": "Get many rows",
+      "credentials": {
+        "supabaseApi": {
+          "id": "JkiOOmIv0tD6rIiW",
+          "name": "LeadGrow Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -224,
+        320
+      ],
+      "id": "1a482cf5-4f1e-4d5d-9659-af39a843bc61",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e7dadbb5-609d-4bcc-b5df-823688f4e39e",
+              "leftValue": "={{ (new Date().getTime() - new Date($json.created_at).getTime()) / (1000 * 60 * 60) }}\n",
+              "rightValue": 48,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            },
+            {
+              "id": "fdf3e8c1-7e88-4b54-b0a4-e695bd0fa64d",
+              "leftValue": "={{ (new Date().getTime() - new Date($json.posted_at_timestamp).getTime()) / (1000 * 60 * 60) }}\n",
+              "rightValue": 500,
+              "operator": {
+                "type": "number",
+                "operation": "lte"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -16,
+        192
+      ],
+      "id": "cd0ed711-c7ec-421e-b3ea-96f8c0fa87c0",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedin",
+        "operation": "update",
+        "tableId": "linkedin_posts",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "PROCESSING"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        176,
+        176
+      ],
+      "id": "8691244a-ec45-4d8a-933a-1322a069b5da",
+      "name": "Update a row1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JkiOOmIv0tD6rIiW",
+          "name": "LeadGrow Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "gXR8jZyH3VZ0kn0HOLbPD",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/gXR8jZyH3VZ0kn0HOLbPD",
+          "cachedResultName": "Linkedin Monitoring Part 3"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        -16
+      ],
+      "id": "f7fa8515-a88a-4cb2-9bdd-37952d2388d2",
+      "name": "Call 'Linkedin Monitoring Part 3'"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "81024d71-fa88-4429-a526-4cbb02da3108",
+              "name": "set",
+              "value": "0",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        352
+      ],
+      "id": "68f6a6c8-c0dc-483a-ba8a-d0bbcaf89292",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {
+    "Schedule Trigger": [
+      {
+        "json": {
+          "timestamp": "2025-10-21T00:00:46.009-04:00",
+          "Readable date": "October 21st 2025, 12:00:46 am",
+          "Readable time": "12:00:46 am",
+          "Day of week": "Tuesday",
+          "Year": "2025",
+          "Month": "October",
+          "Day of month": "21",
+          "Hour": "00",
+          "Minute": "00",
+          "Second": "46",
+          "Timezone": "America/New_York (UTC-04:00)"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "Call 'Linkedin Monitoring Part 3'",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Update a row1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a row1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1,
+    "errorWorkflow": "LNwE4m6WRjTXKwaR"
+  },
+  "versionId": "4ebe89cf-4b01-4241-864f-5c408b0a746f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0340720d49934e3aa41ef4ea071f476d64886fd721f069b3f0416771ceea6f18"
+  },
+  "id": "mYowJD9nOGAlMewXrQGHc",
+  "tags": []
+}

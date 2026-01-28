@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { ToastProvider } from './components/ui/toast'
 import Layout from './components/layout/Layout'
 import Dashboard from './pages/Dashboard'
 import Profiles from './pages/Profiles'
@@ -24,20 +25,22 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Navigate to="/dashboard" replace />} />
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="profiles" element={<Profiles />} />
-              <Route path="posts" element={<Posts />} />
-              <Route path="keyword-search" element={<KeywordSearch />} />
-              <Route path="profiles/:profileUrl/posts" element={<PostPerformance />} />
-              <Route path="engagers/:profileUrl" element={<EngagerDetail />} />
-              <Route path="settings" element={<Settings />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
+        <ToastProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Navigate to="/dashboard" replace />} />
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="profiles" element={<Profiles />} />
+                <Route path="posts" element={<Posts />} />
+                <Route path="keyword-search" element={<KeywordSearch />} />
+                <Route path="profiles/:profileUrl/posts" element={<PostPerformance />} />
+                <Route path="engagers/:profileUrl" element={<EngagerDetail />} />
+                <Route path="settings" element={<Settings />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </ToastProvider>
       </ThemeProvider>
     </QueryClientProvider>
   )

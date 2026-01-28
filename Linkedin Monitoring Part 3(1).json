@@ -1,0 +1,3792 @@
+{
+  "name": "Linkedin Monitoring Part 3",
+  "nodes": [
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedin",
+        "operation": "get",
+        "tableId": "enriched_profiles",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "full_name",
+              "keyValue": "={{ $json.basic_info.fullname }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        16
+      ],
+      "id": "0d12f616-7191-47a4-87dc-05df24f3e7e2",
+      "name": "Get a row",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JkiOOmIv0tD6rIiW",
+          "name": "LeadGrow Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "63cc29c9-b440-4036-a1cd-6d92fe974fdd",
+              "leftValue": "={{ $json.profile_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "f7b12fb5-8490-4559-970a-2e12b578b37f",
+              "leftValue": "={{ $('Output').item.json.basic_info.profile_url }}",
+              "rightValue": "={{ $('Loop Over Items').item.json.parent }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1360,
+        192
+      ],
+      "id": "cc4ad1fe-f332-44bd-a281-611ef026f4d0",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedin",
+        "tableId": "enriched_profiles",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "profile_url",
+              "fieldValue": "={{ $('Output').item.json.basic_info.profile_url }}"
+            },
+            {
+              "fieldId": "first_name",
+              "fieldValue": "={{ $('Output').item.json.basic_info.first_name }}"
+            },
+            {
+              "fieldId": "last_name",
+              "fieldValue": "={{ $('Output').item.json.basic_info.last_name }}"
+            },
+            {
+              "fieldId": "full_name",
+              "fieldValue": "={{ $('Output').item.json.basic_info.fullname }}"
+            },
+            {
+              "fieldId": "headline",
+              "fieldValue": "={{ $('Output').item.json.basic_info.headline }}"
+            },
+            {
+              "fieldId": "company_name",
+              "fieldValue": "={{ $('Output').item.json.basic_info.current_company }}"
+            },
+            {
+              "fieldId": "company_linkedin_url",
+              "fieldValue": "={{ $('Output').item.json.basic_info.current_company_url }}"
+            },
+            {
+              "fieldId": "location",
+              "fieldValue": "={{ $('Output').item.json.basic_info.location.full }}"
+            },
+            {
+              "fieldId": "connections",
+              "fieldValue": "={{ $('Output').item.json.basic_info.connection_count }}"
+            },
+            {
+              "fieldId": "followers",
+              "fieldValue": "={{ $('Output').item.json.basic_info.follower_count }}"
+            },
+            {
+              "fieldId": "skills",
+              "fieldValue": "={{ $('Output').item.json.basic_info.top_skills }}"
+            },
+            {
+              "fieldId": "public_identifier",
+              "fieldValue": "={{ $('Output').item.json.basic_info.public_identifier }}"
+            },
+            {
+              "fieldId": "urn",
+              "fieldValue": "={{ $('Output').item.json.basic_info.urn }}"
+            },
+            {
+              "fieldId": "experience",
+              "fieldValue": "={{ $('Output').item.json.experience }}"
+            },
+            {
+              "fieldId": "about",
+              "fieldValue": "={{ $('Output').item.json.basic_info.about }}"
+            },
+            {
+              "fieldId": "experience",
+              "fieldValue": "={{ $('Output').item.json.experience }}"
+            },
+            {
+              "fieldId": "educations",
+              "fieldValue": "={{ $('Output').item.json.education }}"
+            },
+            {
+              "fieldId": "skills",
+              "fieldValue": "={{ $('Output').item.json.basic_info.top_skills }}"
+            },
+            {
+              "fieldId": "parent_profile",
+              "fieldValue": "={{ $('If2').first().json.parent }}"
+            },
+            {
+              "fieldId": "engagement_type",
+              "fieldValue": "={{ $('If2').item.json.engagements[0].type }}"
+            },
+            {
+              "fieldId": "engagement_value",
+              "fieldValue": "={{ $('If2').item.json.engagements[0].value }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1616,
+        160
+      ],
+      "id": "b89da876-e364-41ce-bb5d-ebd285c6cf54",
+      "name": "Create a row",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JkiOOmIv0tD6rIiW",
+          "name": "LeadGrow Supabase"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.leadmagic.io/profile-search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"profile_url\": \"{{ $json.basic_info.profile_url }}\"\n}",
+        "options": {
+          "timeout": 100000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        912,
+        16
+      ],
+      "id": "74e9754e-0300-4232-bebc-ae771ddc6347",
+      "name": "HTTP Request2",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "966OzLmqZ1Va27zp",
+          "name": "Leads on Trees"
+        }
+      },
+      "disabled": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/apimaestro~linkedin-profile-detail/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"includeEmail\": true,\n    \"username\": \"{{ $json.contact.urn }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        752,
+        192
+      ],
+      "id": "538dc2a3-1d3c-4fbc-8f72-87a97e96b2a5",
+      "name": "HTTP Request4",
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "X2SNlBhkyhTFLi1K",
+          "name": "Apify - Automations@lg"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -544,
+        400
+      ],
+      "id": "8e13b95f-3812-4075-8646-d6a446de420b",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "65b73cc0-cbb8-4616-b55c-416bd4656e31",
+              "leftValue": "={{ $json.engagements }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -192,
+        400
+      ],
+      "id": "d1c0ada2-10b3-4de8-a088-2d2d5422d91f",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        576,
+        416
+      ],
+      "id": "bc625060-6e35-4689-bcab-f026a4e21d80",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedin",
+        "operation": "get",
+        "tableId": "linkedin_posts",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_url",
+              "keyValue": "={{ $json.post_url }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        784,
+        432
+      ],
+      "id": "e99f69de-bbaf-4e9b-a668-554656debf44",
+      "name": "Get a row1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JkiOOmIv0tD6rIiW",
+          "name": "LeadGrow Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        336
+      ],
+      "id": "20c04354-055d-4d43-b209-24da4fd3eb38",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedin",
+        "operation": "update",
+        "tableId": "linkedin_posts",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "PROCESSED - 1"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        944,
+        432
+      ],
+      "id": "c437b48f-6e46-48fc-9cef-397dfd9e6b1f",
+      "name": "Update a row",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JkiOOmIv0tD6rIiW",
+          "name": "LeadGrow Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        800,
+        656
+      ],
+      "id": "4381fe8c-6d2e-4783-94b1-37afd0f5c2a7",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4c521e15-08c3-4c25-9442-c0434b512b66",
+              "leftValue": "={{ $json.profile_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -16,
+        208
+      ],
+      "id": "d1d8da85-2c59-48c3-89a1-29a29d1c1d8b",
+      "name": "Is Duplicate?"
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedin",
+        "operation": "get",
+        "tableId": "enriched_profiles",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "urn",
+              "keyValue": "={{ $json.contact.urn }}"
+            },
+            {
+              "keyName": "parent_profile",
+              "keyValue": "={{ $json.parent }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "954b13ec-b53f-44da-ac05-952dd7509395",
+      "name": "Get a row2",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JkiOOmIv0tD6rIiW",
+          "name": "LeadGrow Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -272,
+        208
+      ],
+      "id": "d423d9c9-b5f1-4be2-9b67-6675947dd2d1",
+      "name": "Loop Over Items2"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "urn",
+              "field2": "contact.urn"
+            }
+          ]
+        },
+        "joinMode": "keepNonMatches",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        192,
+        256
+      ],
+      "id": "a8fd9ec7-cafe-4a05-ad5a-cfe0ee797040",
+      "name": "Merge"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        192
+      ],
+      "id": "51233e68-2374-499d-8db2-4c3d51ed83f7",
+      "name": "Output"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a5d1f11a-b1bc-4cad-9a3d-88d8430c31d5",
+              "leftValue": "={{ $json.contact.name }}",
+              "rightValue": "Mitchell Keller",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "f23defba-768c-4a3d-98d1-e53b5acc1f88",
+              "leftValue": "={{ $json.contact.name }}",
+              "rightValue": "Alexa Grabell",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        352,
+        256
+      ],
+      "id": "f3acd276-d231-4d98-8c7d-bd9018ef72e3",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "77d1a558-6427-4752-b584-8e8122e3be2e",
+              "name": "post_url",
+              "value": "={{ $json.post_url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        416
+      ],
+      "id": "6ff4f2f9-c147-4401-b861-02dd63b4bc35",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        592,
+        816
+      ],
+      "id": "2ae9bc41-d42b-4c52-873e-dc1df266c6b0",
+      "name": "Loop Over Items3"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        816,
+        1056
+      ],
+      "id": "30b0e208-41a0-41c4-9353-fabe00d9836b",
+      "name": "No Operation, do nothing2"
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedin",
+        "operation": "get",
+        "tableId": "enriched_profiles",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "full_name",
+              "keyValue": "={{ $json.contact.name }}"
+            },
+            {
+              "keyName": "parent_profile",
+              "keyValue": "={{ $json.parent }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        800,
+        832
+      ],
+      "id": "eed72d75-49e5-4de4-b8a0-1290d4ec6679",
+      "name": "Get Engagers",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JkiOOmIv0tD6rIiW",
+          "name": "LeadGrow Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedin",
+        "operation": "get",
+        "tableId": "linkedin_posts",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_url",
+              "keyValue": "={{ $('Loop Over Items3').item.json.post_url }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        976,
+        832
+      ],
+      "id": "30e6ae53-bd56-40f0-9b48-bc01b67bdff0",
+      "name": "Get Posts",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JkiOOmIv0tD6rIiW",
+          "name": "LeadGrow Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedin",
+        "tableId": "post_engagements",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "engager_profile_url",
+              "fieldValue": "={{ $('Get Engagers').item.json.profile_url }}"
+            },
+            {
+              "fieldId": "post_url",
+              "fieldValue": "={{ $('Loop Over Items3').item.json.post_url }}"
+            },
+            {
+              "fieldId": "post_text",
+              "fieldValue": "={{ $json.post_text }}"
+            },
+            {
+              "fieldId": "monitored_profile_url",
+              "fieldValue": "={{ $('Get Engagers').item.json.parent_profile }}"
+            },
+            {
+              "fieldId": "engagement_type",
+              "fieldValue": "={{ $('Loop Over Items3').item.json.engagements[0].type }}"
+            },
+            {
+              "fieldId": "engaged_at",
+              "fieldValue": "={{ $('Get Engagers').item.json.created_at }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ $('Get Engagers').item.json.last_enriched_at }}"
+            },
+            {
+              "fieldId": "engagement_value",
+              "fieldValue": "={{ $('Loop Over Items3').item.json.engagements[0].value }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        832
+      ],
+      "id": "4943123a-b346-4767-9d8d-5854b067db8f",
+      "name": "Save Engagements",
+      "alwaysOutputData": false,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JkiOOmIv0tD6rIiW",
+          "name": "LeadGrow Supabase"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.executionData",
+      "typeVersion": 1.1,
+      "position": [
+        -368,
+        400
+      ],
+      "id": "1dc135f2-a835-46db-88d0-7e47cd3153c0",
+      "name": "Execution Data"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_the-patten-i-am-seeing-with-how-sandboxes-activity-7418807761951645696-gVau?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Nitin Jain",
+            "headline": "Software Engineer, ML @ Meta (ex-Alexa)",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAZOqJIBBiKmNWGdOeUp1kr_zt3E2odB4CI",
+            "urn": "ACoAAAZOqJIBBiKmNWGdOeUp1kr_zt3E2odB4CI"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_the-patten-i-am-seeing-with-how-sandboxes-activity-7418807761951645696-gVau?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Jon T.",
+            "headline": "Founder · Software Engineer · Crafting intelligent tools for complex work",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAspt4sBXvRfVRGey0VX78WudVifEZLChXY",
+            "urn": "ACoAAAspt4sBXvRfVRGey0VX78WudVifEZLChXY"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 1
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_the-patten-i-am-seeing-with-how-sandboxes-activity-7418807761951645696-gVau?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Nick Locascio",
+            "headline": "Gen AI at DoorDash",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAm-tWUBt_rNQSRSZKqBO3VkP2d7cKthVSw",
+            "urn": "ACoAAAm-tWUBt_rNQSRSZKqBO3VkP2d7cKthVSw"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 2
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_the-patten-i-am-seeing-with-how-sandboxes-activity-7418807761951645696-gVau?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Jayita Bhattacharyya🗣️🎤",
+            "headline": "Data Scientist || Tech Speaker || Hackathon Wizard || MLE",
+            "profileUrl": "https://www.linkedin.com/in/ACoAACdGFH0BS8jIUt--gTmVVx-hF4xqPNp2vv0",
+            "urn": "ACoAACdGFH0BS8jIUt--gTmVVx-hF4xqPNp2vv0"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 3
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_the-patten-i-am-seeing-with-how-sandboxes-activity-7418807761951645696-gVau?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Satish Bomma",
+            "headline": "Principal Solutions Architect - GenAI and Search Expert | MBA",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAA5kvIBM6eSCrXXpprpYCGXoElNkgwB6n4",
+            "urn": "ACoAAAA5kvIBM6eSCrXXpprpYCGXoElNkgwB6n4"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 4
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_the-patten-i-am-seeing-with-how-sandboxes-activity-7418807761951645696-gVau?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Kelly Abuelsaad",
+            "headline": "AI Agent Platform Architect and Engineer",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAASsVq4Bj2U9ArNPaFsx9RCS9ax00VIgJBs",
+            "urn": "ACoAAASsVq4Bj2U9ArNPaFsx9RCS9ax00VIgJBs"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 5
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_the-patten-i-am-seeing-with-how-sandboxes-activity-7418807761951645696-gVau?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Shanshan Wang",
+            "headline": "AI/ML, Ph.D, Kaggle Master",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABFyAuoBSYRcQtaK67amUI8jxFFN7WgXGu0",
+            "urn": "ACoAABFyAuoBSYRcQtaK67amUI8jxFFN7WgXGu0"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 6
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_the-patten-i-am-seeing-with-how-sandboxes-activity-7418807761951645696-gVau?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Sharma Podila",
+            "headline": "Technology leader",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAB82okB2M2u9VWiJCdfNDYdNWL19ejxAbo",
+            "urn": "ACoAAAB82okB2M2u9VWiJCdfNDYdNWL19ejxAbo"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 7
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_the-patten-i-am-seeing-with-how-sandboxes-activity-7418807761951645696-gVau?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Siddhant Deshmukh",
+            "headline": "Software Engineer at Figma",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABBRjPkBieusRwUGMjWpxKQVpY7fj-5RGVs",
+            "urn": "ACoAABBRjPkBieusRwUGMjWpxKQVpY7fj-5RGVs"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 8
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_the-patten-i-am-seeing-with-how-sandboxes-activity-7418807761951645696-gVau?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Andrew Critchell",
+            "headline": "Proud husband and girl dad. Leader in Data Governance and Master Data Management.",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAZ5NcoBR50drWaOIe1Jo3CaFvmeAKtZ5HU",
+            "urn": "ACoAAAZ5NcoBR50drWaOIe1Jo3CaFvmeAKtZ5HU"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 9
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_the-patten-i-am-seeing-with-how-sandboxes-activity-7418807761951645696-gVau?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Venkat Chandra (\"VC\")",
+            "headline": "Building AI Foundry",
+            "profileUrl": "https://www.linkedin.com/in/venkatrchandra",
+            "urn": "ACoAAABsiPwBIzhEBxpC6wbH4kPpXT50aVu-H6A"
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "Brute-force intelligence at scale. It works. Most work has defined patterns ...its our lack of organization that makes it look less deterministic and rote than it actually is"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 10
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Ming Zhao",
+            "headline": "Ph.D. in Physics. Experienced physicist / data scientist; Kaggle expert",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAGIQAIBauqR560EEc9xcu6QHQ_9Dj95Nvo",
+            "urn": "ACoAAAGIQAIBauqR560EEc9xcu6QHQ_9Dj95Nvo"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 11
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Monal D.",
+            "headline": "Sr. Engineering Manager, AI/ML at Meta (Hiring!!)",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAABo5HEBoIbWzr-kaIZhsRA8THSzn6RgTY8",
+            "urn": "ACoAAABo5HEBoIbWzr-kaIZhsRA8THSzn6RgTY8"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 12
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "pravachana rajkumar",
+            "headline": "Quality Assurance Executive at ASRAM hospital",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAFLM3HsBoEafvehXVNFNTM-aCeTXNyZRHDg",
+            "urn": "ACoAAFLM3HsBoEafvehXVNFNTM-aCeTXNyZRHDg"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 13
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Giles Lowe",
+            "headline": "Founder | CEO | Advisor | Investor | Board Member - Longevity Focus",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAAmBJ0B58dq-SRY01wCcZNESzWWYNOgXWE",
+            "urn": "ACoAAAAmBJ0B58dq-SRY01wCcZNESzWWYNOgXWE"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 14
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Shane Hummus",
+            "headline": "I Teach YouTube For Busy Business Owners | Creator of The 'Hybrid Personal Brand' Method™ | YouTube Growth Expert | The \"Monetization\" Guy",
+            "profileUrl": "https://www.linkedin.com/in/ACoAACdm3K8Bkt8cowzdkA9u8kehmsx-k3TO2F8",
+            "urn": "ACoAACdm3K8Bkt8cowzdkA9u8kehmsx-k3TO2F8"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 15
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Corbin Miller",
+            "headline": "Senior Software Engineer",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAAqOMgBwU6VnCbm7l5KlIC0MqFUChJW2hE",
+            "urn": "ACoAAAAqOMgBwU6VnCbm7l5KlIC0MqFUChJW2hE"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 16
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Vivek Saigal",
+            "headline": "Product Manager | Integrations, Pricing, Payments & Billing | Amazon.com",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAATBi6YBBhJ-aVXOvRGWeoJwLeLzm6zenjM",
+            "urn": "ACoAAATBi6YBBhJ-aVXOvRGWeoJwLeLzm6zenjM"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 17
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Saadat Azim",
+            "headline": "Software Engineer at AWS Serverless",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAGbMOEBtDUTydrQUKCx5_llfftXpvuGC2c",
+            "urn": "ACoAAAGbMOEBtDUTydrQUKCx5_llfftXpvuGC2c"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "PRAISE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 18
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Gladys De Paz Pogenio",
+            "headline": "Account Manager at Windmill Growth",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAFSLlhUBmAn2jcCp5bw4VBLrz1UeyuSHhkI",
+            "urn": "ACoAAFSLlhUBmAn2jcCp5bw4VBLrz1UeyuSHhkI"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 19
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Ranjib Dey",
+            "headline": "Father, Maker, OpenSource software and open hardware",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAB6aPbgBzATDkBHw60FOBDgW3awk3ZjQf5E",
+            "urn": "ACoAAB6aPbgBzATDkBHw60FOBDgW3awk3ZjQf5E"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 20
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Shashi Kant Oraon",
+            "headline": "Product Management at vivo India",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAzhkEgBaRumkn0mJ46qDYcZbUN4wnF14Oo",
+            "urn": "ACoAAAzhkEgBaRumkn0mJ46qDYcZbUN4wnF14Oo"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 21
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Maya Ross",
+            "headline": "AI-focused Sr Executive Assistant Business Partner (EABP III L5) at Uber",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAr7fnwBID5uJ-vp1ZFx2yl9t9RWpAit60Q",
+            "urn": "ACoAAAr7fnwBID5uJ-vp1ZFx2yl9t9RWpAit60Q"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 22
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Victoria Enshi Huang",
+            "headline": "PhD, Machine Learning & Generative AI",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABV7dtsB2Lp8j02W7Dv3JiBDYVBTRvRVn5Y",
+            "urn": "ACoAABV7dtsB2Lp8j02W7Dv3JiBDYVBTRvRVn5Y"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 23
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Drew Ruchim",
+            "headline": "Co-Founder @ Aditt | Helping brands reduce wasted ad spend",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAEGxQiQBDcuS0S8yZxHsxDgIsgrI2DGRp3A",
+            "urn": "ACoAAEGxQiQBDcuS0S8yZxHsxDgIsgrI2DGRp3A"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 24
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Jeetendra Gangele",
+            "headline": "Tech Entrepreneur | 2x Exited Founder | CTO & AI Systems Builder (0→1, Scale) | NLP, Data Platforms, ML Infra",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAOTwRcBd89pYGzXRYmEhVlrlGogN_QWqzk",
+            "urn": "ACoAAAOTwRcBd89pYGzXRYmEhVlrlGogN_QWqzk"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 25
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Debarpan Jha",
+            "headline": "Systems Engineer @TCS| Ex-Full Stack Gen AI Freelancer @HevaAI | Ex-Consultant Engineering Intern @Caravel Labs |@GDSCHITDesignTeam| Postman Student Expert | Full Stack Developer",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADK67zUBy5kmGJKbADFSlAo0bfcfCq7Pt4U",
+            "urn": "ACoAADK67zUBy5kmGJKbADFSlAo0bfcfCq7Pt4U"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 26
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Adrian Lubis",
+            "headline": "VP-Head of Resources & Manufacturing at Indosat Ooredoo | Business Development | Regional Sales | Smart City | Telecommunication | ICT | Marketing | Resources & Manufacture",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAALiGcQBXbaLK44y7bkcCiQQ9UKyofsCk08",
+            "urn": "ACoAAALiGcQBXbaLK44y7bkcCiQQ9UKyofsCk08"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 27
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Amrapali Bhowmik",
+            "headline": "Wealth Management | MBA - IIM Bangalore | B.Tech(Hons.) - NIT Rourkela",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAANqfKMBu1GUzN9ZP3e55lGG4g4tuqbqPGs",
+            "urn": "ACoAAANqfKMBu1GUzN9ZP3e55lGG4g4tuqbqPGs"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 28
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Shreyans Bhansali",
+            "headline": "Free AI coding with askcodi.com",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABZQXgIBoCSBsaEUqAgyPkaHmc7IImHF-uQ",
+            "urn": "ACoAABZQXgIBoCSBsaEUqAgyPkaHmc7IImHF-uQ"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 29
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Burzin Patel",
+            "headline": "Founding VP of Product @ Inception | Go-to-Market Strategy",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAAMjF4BGdgdnJxsLu61BOgRDlWDAODDDeM",
+            "urn": "ACoAAAAMjF4BGdgdnJxsLu61BOgRDlWDAODDDeM"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 30
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Deepti Srivastava",
+            "headline": "Solving the structured data problem for AI with Snow Leopard!",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAB1IN0BmFSm58rixhH4xLWBG929SYi5u_U",
+            "urn": "ACoAAAB1IN0BmFSm58rixhH4xLWBG929SYi5u_U"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 31
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Michael Diesu",
+            "headline": "Co-founder & CEO @ Tie",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABLecb4BKDfu_y5-Wi3lQtKl5Qj8aKKjdJg",
+            "urn": "ACoAABLecb4BKDfu_y5-Wi3lQtKl5Qj8aKKjdJg"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 32
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Jérémie Lasnier",
+            "headline": "Designing Growth for Startups & Brands | Prev. Cofounder LiveLike VR (Acq. by Cosm) | Forbes 30U30 Alumni",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAA9SoYsBR0PtqYXLCzMKkWifVnf5peQaFFI",
+            "urn": "ACoAAA9SoYsBR0PtqYXLCzMKkWifVnf5peQaFFI"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "APPRECIATION"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 33
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Pinaki Mukherjee",
+            "headline": "Corporate Development | Private Equity M&A and Restructuring | Strategy and Business Development | DC Infra, Semiconductor, Cybersecurity",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAAZkOABWCVOpshchq99uXbKPnm8JKvxX5k",
+            "urn": "ACoAAAAZkOABWCVOpshchq99uXbKPnm8JKvxX5k"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 34
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Damian Tenuta",
+            "headline": "🏠 Founders House - community coworking with sauna, cold plunge and yoga",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABlpiRwBQKOc5F1bf73QsjscgFV8Jcme8s4",
+            "urn": "ACoAABlpiRwBQKOc5F1bf73QsjscgFV8Jcme8s4"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 35
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Ramesh G. Iyer",
+            "headline": "Infra Dev @ LinkedIn | Kubernetes | Compute & Networking",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAA2BFMBn0IZbt5DS8Uo03xxCd1beHucwrs",
+            "urn": "ACoAAAA2BFMBn0IZbt5DS8Uo03xxCd1beHucwrs"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "APPRECIATION"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 36
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Noah Itovitch",
+            "headline": "Hard at work building Founders Firm",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAC4kCcMBvaX29sWxCV8DcDJTQmfyqRg0drg",
+            "urn": "ACoAAC4kCcMBvaX29sWxCV8DcDJTQmfyqRg0drg"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "PRAISE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 37
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Anna Sullivan",
+            "headline": "Founder & Social Media Strategist | The Creative Exchange – Social & UGC Strategies for CPG Brands Founder",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAo-xfUBWR_4wQnZVUsoZdtG04RHK0cA1q4",
+            "urn": "ACoAAAo-xfUBWR_4wQnZVUsoZdtG04RHK0cA1q4"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 38
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Heather M.",
+            "headline": "Entrepreneur, Advisor, helping great people to create resilient, useful, scalable distributed systems, while having fun.",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAAyvccBDtwtiJeAqw8h5tWAv8bEe6nrV60",
+            "urn": "ACoAAAAyvccBDtwtiJeAqw8h5tWAv8bEe6nrV60"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "APPRECIATION"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 39
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Sidhant Dixit",
+            "headline": "AI Data Architect @ Case IQ",
+            "profileUrl": "https://www.linkedin.com/in/ACoAACPqdqUBJFhZGwMCKmnXqkFel4H2OBXoaW4",
+            "urn": "ACoAACPqdqUBJFhZGwMCKmnXqkFel4H2OBXoaW4"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 40
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Rashi Rungta",
+            "headline": "AI @ Meta | LTI CMU",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABNFOGoB0ZwxEQCE9nvErC_gKwz1W9VwAJ8",
+            "urn": "ACoAABNFOGoB0ZwxEQCE9nvErC_gKwz1W9VwAJ8"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 41
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Nitin Jain",
+            "headline": "Software Engineer, ML @ Meta (ex-Alexa)",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAZOqJIBBiKmNWGdOeUp1kr_zt3E2odB4CI",
+            "urn": "ACoAAAZOqJIBBiKmNWGdOeUp1kr_zt3E2odB4CI"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 42
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Eugene Batalov",
+            "headline": "| Software Engineer | Technical leader |",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAw7EDUBmPapEfypHogtm-dUX3xT-BFVs0A",
+            "urn": "ACoAAAw7EDUBmPapEfypHogtm-dUX3xT-BFVs0A"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 43
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Jai Dolwani",
+            "headline": "Founder @ The Starters | Helping e-commerce brands find exceptional freelance talent",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAtbc0UBSwX-PufklFSHrbAlV5FFC2FI5-I",
+            "urn": "ACoAAAtbc0UBSwX-PufklFSHrbAlV5FFC2FI5-I"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 44
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "🐦 Sulaiman Alsalameh",
+            "headline": "CEO @ ChiefNest - Embedded operators for busy founders. Not VAs, not COOs, the missing middle.",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAENMGJABnEABSjZodynyZGg5ICBo8mCdoB4",
+            "urn": "ACoAAENMGJABnEABSjZodynyZGg5ICBo8mCdoB4"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 45
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Zoya Ahmed",
+            "headline": "Co-Founder & CEO of Lylah",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAFCEZO8BJniUIcLY2glRXhOrAIDsqpa6Y7Q",
+            "urn": "ACoAAFCEZO8BJniUIcLY2glRXhOrAIDsqpa6Y7Q"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 46
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Kody Nordquist",
+            "headline": "Founder of Nord Media | Performance Marketing Agency for 7 & 8-figure eCom brands",
+            "profileUrl": "https://www.linkedin.com/in/ACoAACn9DdUBWSZDUZpGTZUXDQDGSAYbpAbY5Vg",
+            "urn": "ACoAACn9DdUBWSZDUZpGTZUXDQDGSAYbpAbY5Vg"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "PRAISE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 47
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Fraser Cottrell",
+            "headline": "Co-Founder @ Fraggell | Cut Your CPA By 30% In 60 Days With Our High-Performance Ad Creative | Leaf Shave, Aloha, Govee",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADz_LpsBSUPAyvQAJ31zuSgvUeSfZj1t7Qg",
+            "urn": "ACoAADz_LpsBSUPAyvQAJ31zuSgvUeSfZj1t7Qg"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 48
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Jon T.",
+            "headline": "Founder · Software Engineer · Crafting intelligent tools for complex work",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAspt4sBXvRfVRGey0VX78WudVifEZLChXY",
+            "urn": "ACoAAAspt4sBXvRfVRGey0VX78WudVifEZLChXY"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 49
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Ravi Kurani",
+            "headline": "President of Standard Water Corp | COO @ Poolify | Founder of Sutro (sold to Sani Marc) & ImpactSpace (sold to ImpactAlpha)",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAK_D3sB2ycOgSAaqyha829yxl1vGg-hXjo",
+            "urn": "ACoAAAK_D3sB2ycOgSAaqyha829yxl1vGg-hXjo"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 50
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Aaron Spivak",
+            "headline": "The Founders Club | EY Entrepreneur Of The Year Finalist 2024 | Co-Founder of Hush *Acquired*",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABTl7dMBVrbX-pc81YEvT8zqecCD1CcjG7E",
+            "urn": "ACoAABTl7dMBVrbX-pc81YEvT8zqecCD1CcjG7E"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 51
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Manasi Kulkarni",
+            "headline": "Shaping the future of house transactions | ex-Monzo | ex-Thoughtworks",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAC6NKt0BUxvGTbIHtc-ny30l-AIPzaEx3m8",
+            "urn": "ACoAAC6NKt0BUxvGTbIHtc-ny30l-AIPzaEx3m8"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 52
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Ashwanth Kumar (he/him)",
+            "headline": "CTO @ShelfRadar.ai",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAMV1tcBFmtpGir_o8U6eK1Lttwv3jXslx0",
+            "urn": "ACoAAAMV1tcBFmtpGir_o8U6eK1Lttwv3jXslx0"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 53
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Jordan Banafsheha",
+            "headline": "Digital Marketing for eCommerce, Tech, and Service Businesses at icepop // Shopify Expert // Google Partner // Meta Partner // Brand Owner",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAt04lYBQ22XvbvmWuuN7Mj20hml2nOpvDY",
+            "urn": "ACoAAAt04lYBQ22XvbvmWuuN7Mj20hml2nOpvDY"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 54
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Jordan Rolband",
+            "headline": "DFO Performance - We're Hiring",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAALpsqwBoACIWXqHZIdOfkTTn_i34wgW2lc",
+            "urn": "ACoAAALpsqwBoACIWXqHZIdOfkTTn_i34wgW2lc"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "PRAISE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 55
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Salomon Wainberg",
+            "headline": "Managing Director at Flanker Logistics",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAA-9D2cB3ZTFoCdhdes2DUvU8PxJAC2Ih0Y",
+            "urn": "ACoAAA-9D2cB3ZTFoCdhdes2DUvU8PxJAC2Ih0Y"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 56
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Jess Cervellon",
+            "headline": "Changing the CX & Retention Game | Founder @ Open Late Collective | Prev Feastables by MrBeast",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAS4q4oBzmLjXViL35JDIA1mYcwza8EbVT0",
+            "urn": "ACoAAAS4q4oBzmLjXViL35JDIA1mYcwza8EbVT0"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 57
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Abhay Kashyap",
+            "headline": "something new | prev. StitchFix | AI/ML, PhD",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAVutb8BD94jeHa0FBHviTvbKBlGgr6hd9Y",
+            "urn": "ACoAAAVutb8BD94jeHa0FBHviTvbKBlGgr6hd9Y"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "PRAISE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 58
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Philip Li",
+            "headline": "Adding millions for brands with Amazon | $350M+ Amazon sales generated 2025 | Brands like ALT, Cupids, Tobio’s, KittySpout and more",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABMxf78BZjUfK-uI5MfBbHJKi-WG0oO9iJk",
+            "urn": "ACoAABMxf78BZjUfK-uI5MfBbHJKi-WG0oO9iJk"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 59
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Abe Kr. C.",
+            "headline": "Founder @Elusive | An Artificial Intelligence Research Company. Building real estate related tools",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAE7DmqEBJo4pkY1_In-VwKOJpyRRyK-EeK0",
+            "urn": "ACoAAE7DmqEBJo4pkY1_In-VwKOJpyRRyK-EeK0"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "INTEREST"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 60
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Carl Joshua Javier",
+            "headline": "Account Manager @ Windmill Growth",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADU1bY8BQ-CS-L_O8fkwWYRMf6o-EOWAID8",
+            "urn": "ACoAADU1bY8BQ-CS-L_O8fkwWYRMf6o-EOWAID8"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 61
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Martina Trucco",
+            "headline": "Award-winning CMO | Board Director | Driving breakthrough results at Fortune 500 and hypergrowth unicorns",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAAQd34Beom2cYyrXbMnaCqpVu6AVQ-FRDk",
+            "urn": "ACoAAAAQd34Beom2cYyrXbMnaCqpVu6AVQ-FRDk"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "PRAISE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 62
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Kelly Abuelsaad",
+            "headline": "AI Agent Platform Architect and Engineer",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAASsVq4Bj2U9ArNPaFsx9RCS9ax00VIgJBs",
+            "urn": "ACoAAASsVq4Bj2U9ArNPaFsx9RCS9ax00VIgJBs"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 63
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Neil Budog",
+            "headline": "Detail-oriented Content Quality Specialist @ Windmill Growth | Content Writer & Former Editor-in-Chief @ The Davao Reef",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAEIW71AB7BdFJCWvF4xk1PjnBEhLTQ9E9Wk",
+            "urn": "ACoAAEIW71AB7BdFJCWvF4xk1PjnBEhLTQ9E9Wk"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "PRAISE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 64
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Antonio Jose Jimeno Yepes",
+            "headline": "Artificial Intelligence | Natural Language Processing | Research Lead",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAADCwYIBkqSm4APkl0CdA5YMxCEiSDDUIlA",
+            "urn": "ACoAAADCwYIBkqSm4APkl0CdA5YMxCEiSDDUIlA"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 65
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Pallavi Ahuja",
+            "headline": "AI | Software Engineering | Writes @techNmak",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAE4HkVoB93camF1G6kJEQ-klzNmSTY-EGnA",
+            "urn": "ACoAAE4HkVoB93camF1G6kJEQ-klzNmSTY-EGnA"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 66
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Hunter Lee",
+            "headline": "Sr. Engineering Manager at LinkedIn",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAJkBx4Bc2isEmmbqKsT8D7A57g6WSn7YLY",
+            "urn": "ACoAAAJkBx4Bc2isEmmbqKsT8D7A57g6WSn7YLY"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 67
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Shanshan Wang",
+            "headline": "AI/ML, Ph.D, Kaggle Master",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABFyAuoBSYRcQtaK67amUI8jxFFN7WgXGu0",
+            "urn": "ACoAABFyAuoBSYRcQtaK67amUI8jxFFN7WgXGu0"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "INTEREST"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 68
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Abe Kr. C.",
+            "headline": "Founder @Elusive | An Artificial Intelligence Research Company. Building real estate related tools",
+            "profileUrl": "https://www.linkedin.com/in/abeai",
+            "urn": "ACoAAE7DmqEBJo4pkY1_In-VwKOJpyRRyK-EeK0"
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "actually helpful ngl "
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 69
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Kody Nordquist",
+            "headline": "Founder of Nord Media | Performance Marketing Agency for 7 & 8-figure eCom brands",
+            "profileUrl": "https://www.linkedin.com/in/kodynordquist",
+            "urn": "ACoAACn9DdUBWSZDUZpGTZUXDQDGSAYbpAbY5Vg"
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "Way to goo!!\n"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 70
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Shreyans Bhansali",
+            "headline": "Free AI coding with askcodi.com",
+            "profileUrl": "https://www.linkedin.com/in/shreyansbhansali",
+            "urn": "ACoAABZQXgIBoCSBsaEUqAgyPkaHmc7IImHF-uQ"
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "That’s huge. On-call fatigue is such a silent killer for dev teams. Curious how you’re handling the “edge” cases where context isn’t clear — does it lean toward human escalation or try to learn from follow-ups?"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 71
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "🐦 Sulaiman Alsalameh",
+            "headline": "CEO @ ChiefNest - Embedded operators for busy founders. Not VAs, not COOs, the missing middle.",
+            "profileUrl": "https://www.linkedin.com/in/s-alsalameh",
+            "urn": "ACoAAENMGJABnEABSjZodynyZGg5ICBo8mCdoB4"
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "👏👏\n"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 72
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Preston Pollock",
+            "headline": "Founder @ SoniqCX | Revenue-Focused BPO | We Turn Your Contact Center Into a Profit Center | B2C | B2B | SaaS",
+            "profileUrl": "https://www.linkedin.com/in/preston-pollock-soniqcx",
+            "urn": "ACoAAB3pTRYBQ-q_4mdxRYEsmeNIQjJ1VHfDHIc"
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "This is next level stuff 🙌"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 73
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Dr. Martin Schiele",
+            "headline": "AI architect | GDPR-compliant AI systems, independent of big tech - directly in your IT infrastructure | AI | data protection | automation | infrastructure | B2B",
+            "profileUrl": "https://www.linkedin.com/in/dr-martin-schiele",
+            "urn": "ACoAABEUh5sBWfLu4JNh-FKdKDjUOcIPNYvKj7U"
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "Impressive concept, but let's see if it stands the test of time and real-world incidents. Handling human judgment is still a tough nut to crack!"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 74
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Pinaki Mukherjee",
+            "headline": "Corporate Development | Private Equity M&A and Restructuring | Strategy and Business Development | DC Infra, Semiconductor, Cybersecurity",
+            "profileUrl": "https://www.linkedin.com/in/pinaki-mukherjee-740689",
+            "urn": "ACoAAAAZkOABWCVOpshchq99uXbKPnm8JKvxX5k"
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "This is awesome\n"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 75
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_we-built-an-ai-on-call-engineer-an-ai-activity-7417266166194307072-LQvn?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Anna Sullivan",
+            "headline": "Founder & Social Media Strategist | The Creative Exchange – Social & UGC Strategies for CPG Brands Founder",
+            "profileUrl": "https://www.linkedin.com/in/aesullivan2010",
+            "urn": "ACoAAAo-xfUBWR_4wQnZVUsoZdtG04RHK0cA1q4"
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "Reducing unnecessary wake-ups feels like a meaningful win!"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 76
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Amir Begalinov",
+            "headline": "Senior Software Development Engineer",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAB6swEUBijlaWHE_E-PawqE2NtQX8pUJLt8",
+            "urn": "ACoAAB6swEUBijlaWHE_E-PawqE2NtQX8pUJLt8"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 77
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Monal D.",
+            "headline": "Sr. Engineering Manager, AI/ML at Meta (Hiring!!)",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAABo5HEBoIbWzr-kaIZhsRA8THSzn6RgTY8",
+            "urn": "ACoAAABo5HEBoIbWzr-kaIZhsRA8THSzn6RgTY8"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 78
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Drew Ruchim",
+            "headline": "Co-Founder @ Aditt | Helping brands reduce wasted ad spend",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAEGxQiQBDcuS0S8yZxHsxDgIsgrI2DGRp3A",
+            "urn": "ACoAAEGxQiQBDcuS0S8yZxHsxDgIsgrI2DGRp3A"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 79
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Zoya Ahmed",
+            "headline": "Co-Founder & CEO of Lylah",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAFCEZO8BJniUIcLY2glRXhOrAIDsqpa6Y7Q",
+            "urn": "ACoAAFCEZO8BJniUIcLY2glRXhOrAIDsqpa6Y7Q"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 80
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Clint S.",
+            "headline": "Principal Engineer at GrowthX AI",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAACRNm0BhZxLi62Fx3zQyypk-MBH629Iz3E",
+            "urn": "ACoAAACRNm0BhZxLi62Fx3zQyypk-MBH629Iz3E"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 81
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Fraser Cottrell",
+            "headline": "Co-Founder @ Fraggell | Cut Your CPA By 30% In 60 Days With Our High-Performance Ad Creative | Leaf Shave, Aloha, Govee",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADz_LpsBSUPAyvQAJ31zuSgvUeSfZj1t7Qg",
+            "urn": "ACoAADz_LpsBSUPAyvQAJ31zuSgvUeSfZj1t7Qg"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 82
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Lucas Jackson",
+            "headline": "Software Engineer @ Trace",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABgWl-MB4KTWIUg55TLb6862Ut0cIDcZM88",
+            "urn": "ACoAABgWl-MB4KTWIUg55TLb6862Ut0cIDcZM88"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 83
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Likitha S",
+            "headline": "Product Designer for AI | I help founders, PMs & design teams build trustworthy AI UX | Open to new projects → DM me",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAB-bOIoB_Vg7bjat25CT5H1gDVehLbqJfp4",
+            "urn": "ACoAAB-bOIoB_Vg7bjat25CT5H1gDVehLbqJfp4"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 84
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "🐦 Sulaiman Alsalameh",
+            "headline": "CEO @ ChiefNest - Embedded operators for busy founders. Not VAs, not COOs, the missing middle.",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAENMGJABnEABSjZodynyZGg5ICBo8mCdoB4",
+            "urn": "ACoAAENMGJABnEABSjZodynyZGg5ICBo8mCdoB4"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 85
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Kody Nordquist",
+            "headline": "Founder of Nord Media | Performance Marketing Agency for 7 & 8-figure eCom brands",
+            "profileUrl": "https://www.linkedin.com/in/ACoAACn9DdUBWSZDUZpGTZUXDQDGSAYbpAbY5Vg",
+            "urn": "ACoAACn9DdUBWSZDUZpGTZUXDQDGSAYbpAbY5Vg"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 86
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "suchit puri",
+            "headline": "Head of AI Solutions @Google, Co-Founder Adalyz, Previous Head of Engineering PushCrew/Wingify",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAALycUkB_3y3SlQpBYexadc5rLuQJcpwjpE",
+            "urn": "ACoAAALycUkB_3y3SlQpBYexadc5rLuQJcpwjpE"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 87
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Joshua Chin",
+            "headline": "CEO, Chronos Agency | Retention systems that turn $1 into $43+ | $400M+ attributed revenue via Email, SMS, Push | Free Audit Below",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABx_TF4BrmrMHlL60u5qLcfCm8P1lkqDYxQ",
+            "urn": "ACoAABx_TF4BrmrMHlL60u5qLcfCm8P1lkqDYxQ"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 88
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Federico Waldman",
+            "headline": "CEO of Resorsi | We help U.S. companies hire LATAM talent. Fast, affordable, guaranteed. No upfront fees.",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADM8bMABNv9ou8bPPrNOlEIxKv8Pnbj6HaM",
+            "urn": "ACoAADM8bMABNv9ou8bPPrNOlEIxKv8Pnbj6HaM"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 89
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Candace van Oostrum",
+            "headline": "Head of Design at Temporal.io",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAACLXIQBisrhfH9EMqgdQDzODiGibAPY2hA",
+            "urn": "ACoAAACLXIQBisrhfH9EMqgdQDzODiGibAPY2hA"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "PRAISE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 90
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Burzin Patel",
+            "headline": "Founding VP of Product @ Inception | Go-to-Market Strategy",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAAMjF4BGdgdnJxsLu61BOgRDlWDAODDDeM",
+            "urn": "ACoAAAAMjF4BGdgdnJxsLu61BOgRDlWDAODDDeM"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 91
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Hugo Caçote, Eng., MBA, CSCP, LSSBB",
+            "headline": "Strategy & Execution | Supply Chain | Operations Management | Manufacturing | Business Operations | Project Management | Digital Transformation | Operational Excellence | M&A integration | Analytics",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAEROKsBsEyvtdYoqOefrtM-vzlP7--rfjM",
+            "urn": "ACoAAAEROKsBsEyvtdYoqOefrtM-vzlP7--rfjM"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 92
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Noah Itovitch",
+            "headline": "Hard at work building Founders Firm",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAC4kCcMBvaX29sWxCV8DcDJTQmfyqRg0drg",
+            "urn": "ACoAAC4kCcMBvaX29sWxCV8DcDJTQmfyqRg0drg"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "APPRECIATION"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 93
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Parker Smith",
+            "headline": "Retired Professional Athlete | Building Service-Based Businesses | Start A Location With Me ⬇️ |",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADU6CoIBvTl1HHoo5_E64hRwWQNHXoRTJbk",
+            "urn": "ACoAADU6CoIBvTl1HHoo5_E64hRwWQNHXoRTJbk"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 94
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Jérémie Lasnier",
+            "headline": "Designing Growth for Startups & Brands | Prev. Cofounder LiveLike VR (Acq. by Cosm) | Forbes 30U30 Alumni",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAA9SoYsBR0PtqYXLCzMKkWifVnf5peQaFFI",
+            "urn": "ACoAAA9SoYsBR0PtqYXLCzMKkWifVnf5peQaFFI"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "APPRECIATION"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 95
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Abe Kr. C.",
+            "headline": "Founder @Elusive | An Artificial Intelligence Research Company. Building real estate related tools",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAE7DmqEBJo4pkY1_In-VwKOJpyRRyK-EeK0",
+            "urn": "ACoAAE7DmqEBJo4pkY1_In-VwKOJpyRRyK-EeK0"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "INTEREST"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 96
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Jaehoon Lee",
+            "headline": "Crafting Algorithms & Engineering Prompts. Turning ideas into AI reality.",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAGFdQf8Ba75c5lcPPNrJ4KESxBLk5GQIESA",
+            "urn": "ACoAAGFdQf8Ba75c5lcPPNrJ4KESxBLk5GQIESA"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 97
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Aditya Jha",
+            "headline": "Product Engineer @ SuperKalam | ML and GenAI | Kaggle 1x Expert",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAC0buD4BARU_NPxJw3fY4UO3lmAMOlHJVXg",
+            "urn": "ACoAAC0buD4BARU_NPxJw3fY4UO3lmAMOlHJVXg"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 98
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Yujian Tang",
+            "headline": "Guest Lecturer @ Stanford University | CEO @ OSS4AI",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABUawOcBrH3l91Q3Fay4MG8nNKONmcAUO-I",
+            "urn": "ACoAABUawOcBrH3l91Q3Fay4MG8nNKONmcAUO-I"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 99
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Giles Lowe",
+            "headline": "Founder | CEO | Advisor | Investor | Board Member - Longevity Focus",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAAmBJ0B58dq-SRY01wCcZNESzWWYNOgXWE",
+            "urn": "ACoAAAAmBJ0B58dq-SRY01wCcZNESzWWYNOgXWE"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 100
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Henri Sota",
+            "headline": "Cloud Engineer at Adacor GmbH",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAC4OJEcB1N7zkFrrc_XA8tL30hjGaalC064",
+            "urn": "ACoAAC4OJEcB1N7zkFrrc_XA8tL30hjGaalC064"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 101
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Ramesh G. Iyer",
+            "headline": "Infra Dev @ LinkedIn | Kubernetes | Compute & Networking",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAA2BFMBn0IZbt5DS8Uo03xxCd1beHucwrs",
+            "urn": "ACoAAAA2BFMBn0IZbt5DS8Uo03xxCd1beHucwrs"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "APPRECIATION"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 102
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Shetu Mohanto",
+            "headline": "AI Engineer @Delineate (YC W25)",
+            "profileUrl": "https://www.linkedin.com/in/ACoAACUNMIMB7v33m1Jc2tuMEscRrDJd36dPcsE",
+            "urn": "ACoAACUNMIMB7v33m1Jc2tuMEscRrDJd36dPcsE"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 103
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Ashish Anand",
+            "headline": "Tech Fellow, Vice President @Goldman Sachs",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAG2ykcBfLPGczI98IwAMXPSpHFZULQ_i2g",
+            "urn": "ACoAAAG2ykcBfLPGczI98IwAMXPSpHFZULQ_i2g"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 104
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Ravi Kurani",
+            "headline": "President of Standard Water Corp | COO @ Poolify | Founder of Sutro (sold to Sani Marc) & ImpactSpace (sold to ImpactAlpha)",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAK_D3sB2ycOgSAaqyha829yxl1vGg-hXjo",
+            "urn": "ACoAAAK_D3sB2ycOgSAaqyha829yxl1vGg-hXjo"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 105
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Shanshan Wang",
+            "headline": "AI/ML, Ph.D, Kaggle Master",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABFyAuoBSYRcQtaK67amUI8jxFFN7WgXGu0",
+            "urn": "ACoAABFyAuoBSYRcQtaK67amUI8jxFFN7WgXGu0"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 106
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Monty Ngan",
+            "headline": "Co-Founder @ Pearl Talent | Specializing in placing top overseas operators",
+            "profileUrl": "https://www.linkedin.com/in/ACoAACERJ7UBKywAwVnQDongeajC8pySRuAyLRM",
+            "urn": "ACoAACERJ7UBKywAwVnQDongeajC8pySRuAyLRM"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 107
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Vivek Saigal",
+            "headline": "Product Manager | Integrations, Pricing, Payments & Billing | Amazon.com",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAATBi6YBBhJ-aVXOvRGWeoJwLeLzm6zenjM",
+            "urn": "ACoAAATBi6YBBhJ-aVXOvRGWeoJwLeLzm6zenjM"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 108
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Shane Hummus",
+            "headline": "I Teach YouTube For Busy Business Owners | Creator of The 'Hybrid Personal Brand' Method™ | YouTube Growth Expert | The \"Monetization\" Guy",
+            "profileUrl": "https://www.linkedin.com/in/ACoAACdm3K8Bkt8cowzdkA9u8kehmsx-k3TO2F8",
+            "urn": "ACoAACdm3K8Bkt8cowzdkA9u8kehmsx-k3TO2F8"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 109
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Alex O.",
+            "headline": "👥 Scaling Consumer Apps with UGC // 🌍 +200 Clients // ✊🏽 +22 Million Downloads For Clients (to date)",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADlaLzYBEDrTXBiw1PT45Vg2lx7lVjo3ddM",
+            "urn": "ACoAADlaLzYBEDrTXBiw1PT45Vg2lx7lVjo3ddM"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 110
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Dr. Changkun Ou",
+            "headline": "Human-AI interaction researcher. Engineering in intelligent data driven systems.",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABdO-scBh-kset_qxt2YRUd_MLVC4t1ZI3s",
+            "urn": "ACoAABdO-scBh-kset_qxt2YRUd_MLVC4t1ZI3s"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 111
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Jordan Banafsheha",
+            "headline": "Digital Marketing for eCommerce, Tech, and Service Businesses at icepop // Shopify Expert // Google Partner // Meta Partner // Brand Owner",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAt04lYBQ22XvbvmWuuN7Mj20hml2nOpvDY",
+            "urn": "ACoAAAt04lYBQ22XvbvmWuuN7Mj20hml2nOpvDY"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 112
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Jordan Rolband",
+            "headline": "DFO Performance - We're Hiring",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAALpsqwBoACIWXqHZIdOfkTTn_i34wgW2lc",
+            "urn": "ACoAAALpsqwBoACIWXqHZIdOfkTTn_i34wgW2lc"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 113
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Antonio Jose Jimeno Yepes",
+            "headline": "Artificial Intelligence | Natural Language Processing | Research Lead",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAADCwYIBkqSm4APkl0CdA5YMxCEiSDDUIlA",
+            "urn": "ACoAAADCwYIBkqSm4APkl0CdA5YMxCEiSDDUIlA"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 114
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Arindam Majumder",
+            "headline": "Simplifying LLMs, RAG & AI Agent Workflows | Building @Studio1 | 800k+ Reads | Weekly YouTube Tutorials & Blogs",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADvM15kBZfxW1M0EA1WCGEYMiUbAsEqXNE4",
+            "urn": "ACoAADvM15kBZfxW1M0EA1WCGEYMiUbAsEqXNE4"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 115
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Amitesh Shukla",
+            "headline": "Founder",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAASBzXEBe2SKf96gozfnLNsnK3rr7Zq8ztY",
+            "urn": "ACoAAASBzXEBe2SKf96gozfnLNsnK3rr7Zq8ztY"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 116
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Ben Buaron",
+            "headline": "Founder @ Windmill Growth",
+            "profileUrl": "https://www.linkedin.com/in/ACoAADfF3gkBh2tRdaLeNDFUeokOgbmwaoa4HdI",
+            "urn": "ACoAADfF3gkBh2tRdaLeNDFUeokOgbmwaoa4HdI"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 117
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Damian Tenuta",
+            "headline": "🏠 Founders House - community coworking with sauna, cold plunge and yoga",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABlpiRwBQKOc5F1bf73QsjscgFV8Jcme8s4",
+            "urn": "ACoAABlpiRwBQKOc5F1bf73QsjscgFV8Jcme8s4"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 118
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Raghavendra Prasad",
+            "headline": "Driving Enterprise AI Adoption @ Oraczen",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAAR5aYBMOHHMkMt6SknRcO9YCXZGG6vtqg",
+            "urn": "ACoAAAAR5aYBMOHHMkMt6SknRcO9YCXZGG6vtqg"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 119
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Dan Pantelo",
+            "headline": "Founder @ Marpipe",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABLN7rUBTI-V2eVY63NUnDQeY794WNdWXVY",
+            "urn": "ACoAABLN7rUBTI-V2eVY63NUnDQeY794WNdWXVY"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 120
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Phillip Akhzar",
+            "headline": "Packaging API",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAAMLFzIBq25yBDhOxTtBTeyVVPhmnFUnQag",
+            "urn": "ACoAAAMLFzIBq25yBDhOxTtBTeyVVPhmnFUnQag"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 121
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Michael Diesu",
+            "headline": "Co-founder & CEO @ Tie",
+            "profileUrl": "https://www.linkedin.com/in/ACoAABLecb4BKDfu_y5-Wi3lQtKl5Qj8aKKjdJg",
+            "urn": "ACoAABLecb4BKDfu_y5-Wi3lQtKl5Qj8aKKjdJg"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 122
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Corina Taban",
+            "headline": "Leadership development training for Tech companies | ex-Meta, ex-Microsoft | Researcher & Doctoral Candidate | Keynote Speaker | McKinsey Next Generation Women Leaders",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAA6ZgbIBToaXY_jZUGVx4ze60pd6G_Jo2Jw",
+            "urn": "ACoAAA6ZgbIBToaXY_jZUGVx4ze60pd6G_Jo2Jw"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "APPRECIATION"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 123
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Preston Pollock",
+            "headline": "Founder @ SoniqCX | Revenue-Focused BPO | We Turn Your Contact Center Into a Profit Center | B2C | B2B | SaaS",
+            "profileUrl": "https://www.linkedin.com/in/ACoAAB3pTRYBQ-q_4mdxRYEsmeNIQjJ1VHfDHIc",
+            "urn": "ACoAAB3pTRYBQ-q_4mdxRYEsmeNIQjJ1VHfDHIc"
+          },
+          "engagements": [
+            {
+              "type": "reaction",
+              "value": "LIKE"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 124
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Joshua Chin",
+            "headline": "CEO, Chronos Agency | Retention systems that turn $1 into $43+ | $400M+ attributed revenue via Email, SMS, Push | Free Audit Below",
+            "profileUrl": "https://www.linkedin.com/in/joshua-chin-jl",
+            "urn": "ACoAABx_TF4BrmrMHlL60u5qLcfCm8P1lkqDYxQ"
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "honestly Diptanu just classifying pages in long documents saves so much manual work\n"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 125
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Anna Sullivan",
+            "headline": "Founder & Social Media Strategist | The Creative Exchange – Social & UGC Strategies for CPG Brands Founder",
+            "profileUrl": "https://www.linkedin.com/in/aesullivan2010",
+            "urn": "ACoAAAo-xfUBWR_4wQnZVUsoZdtG04RHK0cA1q4"
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "Parsing logic flowing into databases is super smart"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 126
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Jordan Banafsheha",
+            "headline": "Digital Marketing for eCommerce, Tech, and Service Businesses at icepop // Shopify Expert // Google Partner // Meta Partner // Brand Owner",
+            "profileUrl": "https://www.linkedin.com/in/jordan-banafsheha",
+            "urn": "ACoAAAt04lYBQ22XvbvmWuuN7Mj20hml2nOpvDY"
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "It’s not just about parsing it’s about the agent understanding the context"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 127
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Philip Li",
+            "headline": "Adding millions for brands with Amazon | $350M+ Amazon sales generated 2025 | Brands like ALT, Cupids, Tobio’s, KittySpout and more",
+            "profileUrl": "https://www.linkedin.com/in/philipli1",
+            "urn": "ACoAABMxf78BZjUfK-uI5MfBbHJKi-WG0oO9iJk"
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "The gap between static docs and active agents is finally closing with this\n"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 128
+        }
+      },
+      {
+        "json": {
+          "parent": "https://www.linkedin.com/in/diptanu/",
+          "post_url": "https://www.linkedin.com/posts/diptanu_github-sixttensorlake-mcp-tensorlake-activity-7419101320688885760-1qwF?utm_source=combined_share_message&utm_medium=member_desktop&rcm=ACoAAD5xb0cBcXcywU3CieSEYi_FFKJPpkOt-DU",
+          "contact": {
+            "name": "Arindam Majumder",
+            "headline": "Simplifying LLMs, RAG & AI Agent Workflows | Building @Studio1 | 800k+ Reads | Weekly YouTube Tutorials & Blogs",
+            "profileUrl": "https://www.linkedin.com/in/arindam2004",
+            "urn": "ACoAADvM15kBZfxW1M0EA1WCGEYMiUbAsEqXNE4"
+          },
+          "engagements": [
+            {
+              "type": "comment",
+              "value": "This is great ..\n\nWill give it a try"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 129
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Get a row": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Create a row": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [],
+        []
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Execution Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Loop Over Items3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a row1": {
+      "main": [
+        [
+          {
+            "node": "Update a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Update a row": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Duplicate?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a row2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items2": {
+      "main": [
+        [
+          {
+            "node": "Is Duplicate?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a row2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Output": {
+      "main": [
+        [
+          {
+            "node": "Get a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [],
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items3": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Engagers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Engagers": {
+      "main": [
+        [
+          {
+            "node": "Get Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Posts": {
+      "main": [
+        [
+          {
+            "node": "Save Engagements",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Engagements": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execution Data": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1,
+    "errorWorkflow": "LNwE4m6WRjTXKwaR"
+  },
+  "versionId": "d476d74f-880c-4012-8905-f0bda4318f83",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0340720d49934e3aa41ef4ea071f476d64886fd721f069b3f0416771ceea6f18"
+  },
+  "id": "gXR8jZyH3VZ0kn0HOLbPD",
+  "tags": []
+}

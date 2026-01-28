@@ -1,15 +1,25 @@
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, ExternalLink, Building2, MapPin, Users, Award, Briefcase, GraduationCap, TrendingUp } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Building2, MapPin, Users, Award, Briefcase, GraduationCap, TrendingUp, Send } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { formatDate } from '@/lib/utils'
+import { usePushToClay } from '@/hooks/usePushToClay'
+import { useToast } from '@/components/ui/toast'
 
 export default function EngagerDetail() {
   const { profileUrl } = useParams<{ profileUrl: string }>()
   const decodedUrl = profileUrl ? decodeURIComponent(profileUrl) : ''
+  const { pushLead, isPushing } = usePushToClay()
+  const { showToast } = useToast()
+
+  const handlePushToClay = async () => {
+    if (!engager) return
+    const result = await pushLead(engager)
+    showToast(result.message, result.success ? 'success' : 'error')
+  }
 
   const { data: engager, isLoading } = useQuery({
     queryKey: ['engager-detail', decodedUrl],
@@ -74,15 +84,26 @@ export default function EngagerDetail() {
             Back to Dashboard
           </Button>
         </Link>
-        <a
-          href={engager.profile_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:underline"
-        >
-          <ExternalLink className="h-4 w-4" />
-          View LinkedIn Profile
-        </a>
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={handlePushToClay}
+            disabled={isPushing}
+            size="sm"
+            className="gap-2"
+          >
+            <Send className={`h-4 w-4 ${isPushing ? 'animate-pulse' : ''}`} />
+            {isPushing ? 'Pushing...' : 'Push to Clay'}
+          </Button>
+          <a
+            href={engager.profile_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:underline"
+          >
+            <ExternalLink className="h-4 w-4" />
+            View LinkedIn Profile
+          </a>
+        </div>
       </div>
 
       {/* Profile Header Card */}

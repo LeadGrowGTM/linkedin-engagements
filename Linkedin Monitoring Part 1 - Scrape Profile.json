@@ -1,0 +1,513 @@
+{
+  "name": "Linkedin Monitoring Part 1 - Scrape Profile",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/supreme_coder~linkedin-post/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"deepScrape\": true,\n    \"limitPerSource\": 3,\n    \"rawData\": false,\n    \"urls\": [\n        \"{{ $json.profile_url }}\"\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -752,
+        16
+      ],
+      "id": "a9b80767-243a-46f4-8c9c-bd2330c43bfd",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "X2SNlBhkyhTFLi1K",
+          "name": "Apify - Automations@lg"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c2b1d6c4-e055-464d-8b09-9b10d8598273",
+              "leftValue": "={{ $json.is_enabled }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -976,
+        16
+      ],
+      "id": "1370968e-e6f2-4415-9446-36da7aad4d5a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -528,
+        16
+      ],
+      "id": "b4896469-ec9b-4e84-8cb6-87469ad53d82",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "39ce135f-cfb3-48e3-b839-c103444a4253",
+              "leftValue": "={{ $json.post_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "bb9bb7b3-92d7-4230-9813-ba0e743cf284",
+              "leftValue": "={{ $json.post_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -80,
+        -176
+      ],
+      "id": "d9705748-f4f4-4a07-973b-4c16a2ed4fc9",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "daysInterval": 2
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1424,
+        16
+      ],
+      "id": "5f668c99-fc94-48b8-9ef7-83ae8e42b7b5",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedin",
+        "operation": "get",
+        "tableId": "linkedin_posts",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_url",
+              "keyValue": "={{ $('Loop Over Items1').item.json.url }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        -176
+      ],
+      "id": "c2f14a75-526a-458d-851a-0f9811e24870",
+      "name": "Get a row",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JkiOOmIv0tD6rIiW",
+          "name": "LeadGrow Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedin",
+        "tableId": "linkedin_posts",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "post_url",
+              "fieldValue": "={{ $('Loop Over Items1').item.json.url }}"
+            },
+            {
+              "fieldId": "posted_at_timestamp",
+              "fieldValue": "={{ new Date($('Loop Over Items1').item.json.postedAtTimestamp).toISOString() }}"
+            },
+            {
+              "fieldId": "profile_url",
+              "fieldValue": "={{ $('Loop Over Items1').item.json.inputUrl }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "PENDING"
+            },
+            {
+              "fieldId": "post_text",
+              "fieldValue": "={{ $('Loop Over Items1').item.json.text }}"
+            },
+            {
+              "fieldId": "post_id",
+              "fieldValue": "={{ $('Loop Over Items1').item.json.urn.split(':').pop() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        368,
+        -112
+      ],
+      "id": "e0493882-3b30-40bc-9668-f0c52db23fa9",
+      "name": "Create a row",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JkiOOmIv0tD6rIiW",
+          "name": "LeadGrow Supabase"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "228844f2-ea64-4688-b7b0-9b02cbec3428",
+              "leftValue": "={{ $('Loop Over Items1').item.json.post_type }}",
+              "rightValue": "repost",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        144,
+        -176
+      ],
+      "id": "8c1a2df9-22b2-461e-a477-5a22ca8eabb0",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedin",
+        "operation": "getAll",
+        "tableId": "linkedin_profiles",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "is_enabled",
+              "condition": "is",
+              "keyValue": "true"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1216,
+        16
+      ],
+      "id": "173a1f6e-d70f-4db9-9012-8f026f6bdcc0",
+      "name": "Get many rows",
+      "credentials": {
+        "supabaseApi": {
+          "id": "JkiOOmIv0tD6rIiW",
+          "name": "LeadGrow Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "schema": "linkedin",
+        "operation": "update",
+        "tableId": "linkedin_posts",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_url",
+              "condition": "eq",
+              "keyValue": "={{ $('Loop Over Items1').item.json.url }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "post_url",
+              "fieldValue": "={{ $('Loop Over Items1').item.json.url }}"
+            },
+            {
+              "fieldId": "posted_at_timestamp",
+              "fieldValue": "={{ new Date($('Loop Over Items1').item.json.postedAtTimestamp).toISOString() }}"
+            },
+            {
+              "fieldId": "profile_url",
+              "fieldValue": "={{ $('Loop Over Items1').item.json.inputUrl }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "PENDING"
+            },
+            {
+              "fieldId": "post_text",
+              "fieldValue": "={{ $('Loop Over Items1').item.json.text }}"
+            },
+            {
+              "fieldId": "post_id",
+              "fieldValue": "={{ $('Loop Over Items1').item.json.urn.split(':').pop() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        560,
+        -48
+      ],
+      "id": "f1d858c6-beee-4fe1-ae6d-75707d4179ab",
+      "name": "Update a row",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JkiOOmIv0tD6rIiW",
+          "name": "LeadGrow Supabase"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Schedule Trigger": [
+      {
+        "json": {
+          "timestamp": "2025-11-19T05:23:40.545-05:00",
+          "Readable date": "November 19th 2025, 5:23:40 am",
+          "Readable time": "5:23:40 am",
+          "Day of week": "Wednesday",
+          "Year": "2025",
+          "Month": "November",
+          "Day of month": "19",
+          "Hour": "05",
+          "Minute": "23",
+          "Second": "40",
+          "Timezone": "America/New_York (UTC-05:00)"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a row": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a row": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "bc71c18c-78c1-4b41-bf9c-37f985ca65c9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0340720d49934e3aa41ef4ea071f476d64886fd721f069b3f0416771ceea6f18"
+  },
+  "id": "nvBVh9GR22dCDvCYu3ivu",
+  "tags": []
+}
