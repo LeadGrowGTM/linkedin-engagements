@@ -103,6 +103,8 @@ export function useEngagersTracked(timeRange: TimeRange = 7) {
         return {
           id: engager.profile_url, // Use profile_url as unique ID
           profileUrl: engager.profile_url,
+          urn: engager.urn,
+          publicIdentifier: engager.public_identifier,
           fullName: engager.full_name || engager.first_name || username,
           firstName: engager.first_name,
           lastName: engager.last_name,
@@ -119,11 +121,21 @@ export function useEngagersTracked(timeRange: TimeRange = 7) {
           skills: engager.skills,
           experiences: engager.experiences || engager.experience,
           educations: engager.educations,
+          updates: engager.updates,
+          licenseAndCertificates: engager.licenseAndCertificates,
+          honorsAndAwards: engager.honorsAndAwards,
+          languages: engager.languages,
+          volunteerAndAwards: engager.volunteerAndAwards,
+          organizations: engager.organizations,
+          totalTenureMonths: engager.totalTenureMonths,
+          totalTenureDays: engager.totalTenureDays,
           parentProfile: engager.parent_profile || null,
           parentProfileUsername: parentUsername,
           smartTags: smartTags.slice(0, 3), // Show up to 3 tags
           engagementCount,
           createdAt: engager.created_at,
+          lastEnrichedAt: engager.last_enriched_at,
+          rawData: engager.raw_data,
         }
       })
 

@@ -165,9 +165,11 @@ export default function Engagers() {
       showToast('No engagers selected', 'error')
       return
     }
-    // Map to the format expected by usePushToClay
+    // Map to the format expected by usePushToClay (all fields)
     const leadsData = selectedEngagers.map(e => ({
       profile_url: e.profileUrl,
+      urn: e.urn,
+      public_identifier: e.publicIdentifier,
       full_name: e.fullName,
       first_name: e.firstName,
       last_name: e.lastName,
@@ -184,6 +186,18 @@ export default function Engagers() {
       skills: e.skills,
       experiences: e.experiences,
       educations: e.educations,
+      updates: e.updates,
+      licenseAndCertificates: e.licenseAndCertificates,
+      honorsAndAwards: e.honorsAndAwards,
+      languages: e.languages,
+      volunteerAndAwards: e.volunteerAndAwards,
+      organizations: e.organizations,
+      totalTenureMonths: e.totalTenureMonths,
+      totalTenureDays: e.totalTenureDays,
+      parent_profile: e.parentProfile,
+      created_at: e.createdAt,
+      last_enriched_at: e.lastEnrichedAt,
+      raw_data: e.rawData,
     }))
 
     const doPush = async () => {
