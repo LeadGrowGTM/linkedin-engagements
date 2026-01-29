@@ -58,20 +58,18 @@ export function useToast() {
 }
 
 function ClayWebhookAction({ onSave, onDismiss, onRetry }: { onSave: () => void; onDismiss: () => void; onRetry?: () => void }) {
-  const [proxyUrl, setProxyUrl] = useState('')
   const [webhookUrl, setWebhookUrl] = useState('')
   const [isSaving, setIsSaving] = useState(false)
 
   const handleSave = async () => {
-    if (!proxyUrl.trim() || !webhookUrl.trim()) return
+    if (!webhookUrl.trim()) return
 
     setIsSaving(true)
     // Get current settings from localStorage
     const savedSettings = localStorage.getItem('app-settings')
     const settings = savedSettings ? JSON.parse(savedSettings) : {}
 
-    // Update both URLs
-    settings.clayProxyUrl = proxyUrl.trim()
+    // Update webhook URL only
     settings.clayWebhookUrl = webhookUrl.trim()
 
     // Save back to localStorage
@@ -93,31 +91,19 @@ function ClayWebhookAction({ onSave, onDismiss, onRetry }: { onSave: () => void;
 
   return (
     <div className="mt-3 space-y-2">
-      <div>
-        <label className="text-xs font-medium mb-1 block">Proxy URL</label>
-        <Input
-          type="url"
-          placeholder="https://your-clay-proxy.railway.app/push"
-          value={proxyUrl}
-          onChange={(e) => setProxyUrl(e.target.value)}
-          className="h-8 text-sm bg-white dark:bg-navy-900"
-        />
-      </div>
-      <div>
-        <label className="text-xs font-medium mb-1 block">Clay Webhook URL</label>
-        <Input
-          type="url"
-          placeholder="https://app.clay.com/api/v1/webhook/..."
-          value={webhookUrl}
-          onChange={(e) => setWebhookUrl(e.target.value)}
-          className="h-8 text-sm bg-white dark:bg-navy-900"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') handleSave()
-            if (e.key === 'Escape') onDismiss()
-          }}
-        />
-      </div>
-      <div className="flex gap-2 justify-end pt-1">
+      <Input
+        type="url"
+        placeholder="https://app.clay.com/api/v1/webhook/..."
+        value={webhookUrl}
+        onChange={(e) => setWebhookUrl(e.target.value)}
+        className="h-9 text-sm bg-white dark:bg-navy-900"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') handleSave()
+          if (e.key === 'Escape') onDismiss()
+        }}
+        autoFocus
+      />
+      <div className="flex gap-2 justify-end">
         <Button
           variant="ghost"
           size="sm"
@@ -129,7 +115,7 @@ function ClayWebhookAction({ onSave, onDismiss, onRetry }: { onSave: () => void;
         <Button
           size="sm"
           onClick={handleSave}
-          disabled={!proxyUrl.trim() || !webhookUrl.trim() || isSaving}
+          disabled={!webhookUrl.trim() || isSaving}
           className="h-8 text-xs gap-1"
         >
           <Send className="h-3 w-3" />

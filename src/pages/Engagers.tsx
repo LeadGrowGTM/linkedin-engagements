@@ -181,9 +181,15 @@ export default function Engagers() {
     const doPush = async () => {
       const result = await pushMultipleLeads(leadsData)
 
-      // Check if settings need configuration
-      if (!result.success && (result.message.includes('No Clay Proxy URL') || result.message.includes('No Clay Webhook URL'))) {
-        showActionToast('Configure Clay integration to push leads', 'clay-webhook', doPush)
+      // Check if proxy URL is missing - direct to Settings
+      if (!result.success && result.message.includes('No Clay Proxy URL')) {
+        showToast('Set up Clay Proxy URL in Settings first', 'error')
+        return
+      }
+
+      // Check if only webhook URL is missing - show quick input toast
+      if (!result.success && result.message.includes('No Clay Webhook URL')) {
+        showActionToast('Enter your Clay Webhook URL', 'clay-webhook', doPush)
         return
       }
 
