@@ -169,13 +169,21 @@ export default function Engagers() {
     const leadsData = selectedEngagers.map(e => ({
       profile_url: e.profileUrl,
       full_name: e.fullName,
+      first_name: e.firstName,
+      last_name: e.lastName,
       headline: e.headline,
+      about: e.about,
       company_name: e.companyName,
+      company_linkedin_url: e.companyLinkedinUrl,
+      company_website: e.companyWebsite,
       company_industry: e.companyIndustry,
       company_size: e.companySize,
       location: e.location,
       connections: e.connections,
       followers: e.followers,
+      skills: e.skills,
+      experiences: e.experiences,
+      educations: e.educations,
     }))
 
     const doPush = async () => {

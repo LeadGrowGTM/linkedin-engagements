@@ -17,7 +17,10 @@ interface LeadData {
   about?: string | null
   skills?: unknown
   experiences?: unknown
+  experience?: unknown // DB has both columns
   educations?: unknown
+  urn?: string | null
+  public_identifier?: string | null
 }
 
 interface PushResult {
@@ -44,6 +47,7 @@ function formatLeadPayload(lead: LeadData) {
     first_name: lead.first_name,
     last_name: lead.last_name,
     headline: lead.headline,
+    about: lead.about,
     company_name: lead.company_name,
     company_linkedin_url: lead.company_linkedin_url,
     company_website: lead.company_website,
@@ -52,10 +56,11 @@ function formatLeadPayload(lead: LeadData) {
     location: lead.location,
     connections: lead.connections,
     followers: lead.followers,
-    about: lead.about,
     skills: lead.skills,
-    experiences: lead.experiences,
+    experiences: lead.experiences || lead.experience, // DB has both columns
     educations: lead.educations,
+    urn: lead.urn,
+    public_identifier: lead.public_identifier,
     pushed_at: new Date().toISOString(),
   }
 }
