@@ -5,20 +5,28 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useAllPosts, useRefreshPosts } from '@/hooks/usePosts'
 import { formatDate, formatNumber, parseLinkedInUsername } from '@/lib/utils'
-import { useTriggerScrapeEngagers } from '@/hooks/useTriggerScrape'
+import { useTriggerScrapeProfiles, useTriggerScrapeEngagers } from '@/hooks/useTriggerScrape'
 
 export default function Posts() {
   const { data: posts, isLoading, refetch } = useAllPosts()
   const refreshPosts = useRefreshPosts()
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const { trigger: triggerEngagers, isTriggering, result: engagerResult, clearResult } = useTriggerScrapeEngagers()
+  const { trigger: triggerPosts, isTriggering: isTriggeringPosts, result: postsResult, clearResult: clearPostsResult } = useTriggerScrapeProfiles()
+  const { trigger: triggerEngagers, isTriggering: isTriggeringEngagers, result: engagerResult, clearResult: clearEngagerResult } = useTriggerScrapeEngagers()
+
+  useEffect(() => {
+    if (postsResult) {
+      const timer = setTimeout(clearPostsResult, 4000)
+      return () => clearTimeout(timer)
+    }
+  }, [postsResult, clearPostsResult])
 
   useEffect(() => {
     if (engagerResult) {
-      const timer = setTimeout(clearResult, 4000)
+      const timer = setTimeout(clearEngagerResult, 4000)
       return () => clearTimeout(timer)
     }
-  }, [engagerResult, clearResult])
+  }, [engagerResult, clearEngagerResult])
 
   const handleRefresh = async () => {
     setIsRefreshing(true)
@@ -75,19 +83,28 @@ export default function Posts() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {engagerResult && (
-            <span className={`text-sm ${engagerResult.success ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-              {engagerResult.message}
+          {(postsResult || engagerResult) && (
+            <span className={`text-sm ${(postsResult?.success ?? engagerResult?.success) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+              {postsResult?.message || engagerResult?.message}
             </span>
           )}
           <Button
             variant="outline"
-            onClick={triggerEngagers}
-            disabled={isTriggering}
+            onClick={triggerPosts}
+            disabled={isTriggeringPosts}
             className="gap-2"
           >
-            <Zap className={`h-4 w-4 ${isTriggering ? 'animate-pulse' : ''}`} />
-            {isTriggering ? 'Triggering...' : 'Scrape Engagers'}
+            <Zap className={`h-4 w-4 ${isTriggeringPosts ? 'animate-pulse' : ''}`} />
+            {isTriggeringPosts ? 'Triggering...' : 'Scrape Posts'}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={triggerEngagers}
+            disabled={isTriggeringEngagers}
+            className="gap-2"
+          >
+            <Zap className={`h-4 w-4 ${isTriggeringEngagers ? 'animate-pulse' : ''}`} />
+            {isTriggeringEngagers ? 'Triggering...' : 'Scrape Engagers'}
           </Button>
           <Button
             onClick={handleRefresh}
@@ -95,7 +112,7 @@ export default function Posts() {
             className="gap-2"
           >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            Refresh Posts
+            Refresh
           </Button>
         </div>
       </div>
