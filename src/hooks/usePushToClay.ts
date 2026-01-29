@@ -21,6 +21,7 @@ interface LeadData {
   educations?: unknown
   urn?: string | null
   public_identifier?: string | null
+  raw_data?: unknown // Contains additional fields like email
 }
 
 interface PushResult {
@@ -41,11 +42,16 @@ function getSettings() {
 }
 
 function formatLeadPayload(lead: LeadData) {
+  // Extract email from raw_data if available
+  const rawData = lead.raw_data as Record<string, unknown> | null
+  const email = rawData?.email || rawData?.emailAddress || null
+
   return {
     linkedin_url: lead.profile_url,
     full_name: lead.full_name,
     first_name: lead.first_name,
     last_name: lead.last_name,
+    email,
     headline: lead.headline,
     about: lead.about,
     company_name: lead.company_name,
@@ -61,6 +67,7 @@ function formatLeadPayload(lead: LeadData) {
     educations: lead.educations,
     urn: lead.urn,
     public_identifier: lead.public_identifier,
+    raw_data: lead.raw_data, // Include full raw data for Clay to access
     pushed_at: new Date().toISOString(),
   }
 }
