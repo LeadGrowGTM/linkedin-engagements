@@ -94,7 +94,8 @@ export function useKeywordSearchPosts(keyword: string) {
           post_url,
           post_text,
           monitored_profile_url,
-          engaged_at
+          engaged_at,
+          engagement_type
         `)
         .ilike('post_text', `%${keyword.trim()}%`)
         .order('engaged_at', { ascending: false })
@@ -104,7 +105,7 @@ export function useKeywordSearchPosts(keyword: string) {
         throw error
       }
 
-      // Get unique posts
+      // Get unique posts (keep first occurrence which has engagement_type)
       const uniquePosts = Array.from(
         new Map(data.map(item => [item.post_url, item])).values()
       )

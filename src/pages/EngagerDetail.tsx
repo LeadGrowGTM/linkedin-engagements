@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, ExternalLink, Building2, MapPin, Users, Award, Briefcase, GraduationCap, TrendingUp, Send } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Building2, MapPin, Users, Award, Briefcase, GraduationCap, TrendingUp, Send, Globe, Medal, Trophy } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -13,12 +13,24 @@ export default function EngagerDetail() {
   const { profileUrl } = useParams<{ profileUrl: string }>()
   const decodedUrl = profileUrl ? decodeURIComponent(profileUrl) : ''
   const { pushLead, isPushing } = usePushToClay()
-  const { showToast } = useToast()
+  const { showToast, showActionToast } = useToast()
 
   const handlePushToClay = async () => {
     if (!engager) return
-    const result = await pushLead(engager)
-    showToast(result.message, result.success ? 'success' : 'error')
+
+    const doPush = async () => {
+      const result = await pushLead(engager)
+
+      // Check if webhook needs configuration
+      if (!result.success && result.message.includes('No Clay webhook URL configured')) {
+        showActionToast('Add your Clay webhook URL to push leads', 'clay-webhook', doPush)
+        return
+      }
+
+      showToast(result.message, result.success ? 'success' : 'error')
+    }
+
+    await doPush()
   }
 
   const { data: engager, isLoading } = useQuery({
@@ -73,6 +85,9 @@ export default function EngagerDetail() {
   const experiences = Array.isArray(engager.experience) ? engager.experience : []
   const educations = Array.isArray(engager.educations) ? engager.educations : []
   const skills = Array.isArray(engager.skills) ? engager.skills : []
+  const languages = Array.isArray(engager.languages) ? engager.languages : []
+  const certifications = Array.isArray(engager.licenseAndCertificates) ? engager.licenseAndCertificates : []
+  const awards = Array.isArray(engager.honorsAndAwards) ? engager.honorsAndAwards : []
 
   return (
     <div className="space-y-8">
@@ -186,6 +201,20 @@ export default function EngagerDetail() {
                   className="text-base text-primary-600 dark:text-primary-400 hover:underline"
                 >
                   {engager.company_website}
+                </a>
+              </div>
+            )}
+            {engager.company_linkedin_url && (
+              <div>
+                <p className="text-sm font-medium text-navy-500 dark:text-navy-400">Company LinkedIn</p>
+                <a
+                  href={engager.company_linkedin_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-base text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  View Company Page
                 </a>
               </div>
             )}
@@ -330,6 +359,108 @@ export default function EngagerDetail() {
                   </Badge>
                 )
               })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Languages */}
+      {languages.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="h-5 w-5" />
+              Languages
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {languages.map((lang: any, index: number) => {
+                const langName = typeof lang === 'string' ? lang : lang.name || lang.language
+                const proficiency = typeof lang === 'object' ? lang.proficiency : null
+                return (
+                  <Badge key={index} variant="outline" className="gap-1">
+                    {langName}
+                    {proficiency && <span className="text-muted-foreground">({proficiency})</span>}
+                  </Badge>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Certifications */}
+      {certifications.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Medal className="h-5 w-5" />
+              Licenses & Certifications
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {certifications.map((cert: any, index: number) => (
+                <div key={index} className="border-l-2 border-blue-600 pl-4">
+                  <h3 className="font-semibold text-navy-900 dark:text-navy-50">
+                    {cert.name || cert.title}
+                  </h3>
+                  {cert.issuing_organization && (
+                    <p className="text-navy-600 dark:text-navy-400">
+                      {cert.issuing_organization}
+                    </p>
+                  )}
+                  {cert.issue_date && (
+                    <p className="text-sm text-navy-500 dark:text-navy-500">
+                      Issued: {cert.issue_date}
+                    </p>
+                  )}
+                  {cert.credential_id && (
+                    <p className="text-xs text-navy-400 dark:text-navy-600">
+                      Credential ID: {cert.credential_id}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Awards */}
+      {awards.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Trophy className="h-5 w-5" />
+              Honors & Awards
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {awards.map((award: any, index: number) => (
+                <div key={index} className="border-l-2 border-yellow-500 pl-4">
+                  <h3 className="font-semibold text-navy-900 dark:text-navy-50">
+                    {award.title || award.name}
+                  </h3>
+                  {award.issuer && (
+                    <p className="text-navy-600 dark:text-navy-400">
+                      {award.issuer}
+                    </p>
+                  )}
+                  {award.issued_on && (
+                    <p className="text-sm text-navy-500 dark:text-navy-500">
+                      {award.issued_on}
+                    </p>
+                  )}
+                  {award.description && (
+                    <p className="mt-1 text-sm text-navy-700 dark:text-navy-300">
+                      {award.description}
+                    </p>
+                  )}
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>

@@ -220,11 +220,11 @@ export default function Settings() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="clayWebhook">Clay Webhook URL</Label>
+              <Label htmlFor="clayWebhook">Clay Proxy URL</Label>
               <Input
                 id="clayWebhook"
                 type="url"
-                placeholder="https://app.clay.com/api/v1/webhook/..."
+                placeholder="https://your-clay-proxy.railway.app/push"
                 value={settings.clayWebhook}
                 onChange={(e) =>
                   setSettings({ ...settings, clayWebhook: e.target.value })
@@ -232,8 +232,18 @@ export default function Settings() {
                 className="mt-1"
               />
               <p className="mt-1 text-xs text-navy-500 dark:text-navy-400">
-                Create a webhook in Clay and paste the URL here to push leads
+                Use the clay-proxy service URL (e.g., https://your-proxy.railway.app/push)
               </p>
+            </div>
+            <div className="rounded-lg border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950 p-4">
+              <p className="text-sm text-blue-800 dark:text-blue-200 font-medium mb-2">
+                Setup Instructions:
+              </p>
+              <ol className="text-sm text-blue-700 dark:text-blue-300 space-y-1 list-decimal list-inside">
+                <li>Deploy the <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">clay-proxy</code> folder to Railway</li>
+                <li>Set <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">CLAY_WEBHOOK_URL</code> env var to your Clay webhook</li>
+                <li>Paste the proxy URL above (ending with <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">/push</code>)</li>
+              </ol>
             </div>
           </CardContent>
         </Card>

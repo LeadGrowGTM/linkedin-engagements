@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Users, Settings, FileText, Search, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, Users, Settings, FileText, Search, ChevronRight, BarChart3, UserSearch } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -16,6 +16,8 @@ import {
 
 const mainNavigation = [
   { name: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
+  { name: 'Engagers', to: '/engagers', icon: UserSearch },
+  { name: 'Analytics', to: '/analytics', icon: BarChart3 },
   { name: 'Posts', to: '/posts', icon: FileText },
   { name: 'Keyword Search', to: '/keyword-search', icon: Search },
 ]

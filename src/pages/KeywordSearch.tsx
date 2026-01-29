@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, Users, FileText, ExternalLink, TrendingUp, Calendar, Building2, MapPin } from 'lucide-react'
+import { Search, Users, FileText, ExternalLink, TrendingUp, Calendar, Building2, MapPin, Heart, MessageCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -273,7 +273,20 @@ export default function KeywordSearch() {
                         </p>
                       )}
                       <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-2 text-xs text-navy-500 dark:text-navy-400">
+                        <div className="flex items-center gap-3 text-xs text-navy-500 dark:text-navy-400">
+                          {post.engagement_type && (
+                            <Badge
+                              variant={post.engagement_type.toLowerCase() === 'like' ? 'secondary' : 'outline'}
+                              className="gap-1"
+                            >
+                              {post.engagement_type.toLowerCase() === 'like' ? (
+                                <Heart className="h-3 w-3 text-red-500" />
+                              ) : (
+                                <MessageCircle className="h-3 w-3 text-blue-500" />
+                              )}
+                              {post.engagement_type}
+                            </Badge>
+                          )}
                           {post.engaged_at && (
                             <span className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />

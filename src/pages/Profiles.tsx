@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect } from 'react'
-import { Plus, Settings2, Folder, RefreshCw } from 'lucide-react'
+import { Plus, Settings2, Folder, RefreshCw, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import AddProfileModal from '@/components/profiles/AddProfileModal'
 import ManageCategoriesModal from '@/components/profiles/ManageCategoriesModal'
 import ProfileCard from '@/components/profiles/ProfileCard'
@@ -13,6 +14,7 @@ import { useTriggerScrapeProfiles } from '@/hooks/useTriggerScrape'
 export default function Profiles() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const { data: profiles, isLoading } = useProfileStats()
   const { data: categories } = useCategories()
   const { trigger: triggerScrape, isTriggering, result: scrapeResult, clearResult } = useTriggerScrapeProfiles()
@@ -24,22 +26,36 @@ export default function Profiles() {
     }
   }, [scrapeResult, clearResult])
 
+  // Filter profiles by search query
+  const filteredProfiles = useMemo(() => {
+    if (!profiles) return []
+    if (!searchQuery) return profiles
+
+    const query = searchQuery.toLowerCase()
+    return profiles.filter(profile => {
+      const username = profile.profile_url.toLowerCase()
+      const description = (profile.description || '').toLowerCase()
+      const category = (profile.category || '').toLowerCase()
+      return username.includes(query) || description.includes(query) || category.includes(query)
+    })
+  }, [profiles, searchQuery])
+
   // Group profiles by category
   const groupedProfiles = useMemo(() => {
-    if (!profiles) return {}
-    
-    const groups: Record<string, typeof profiles> = {}
-    
-    profiles.forEach(profile => {
+    if (!filteredProfiles.length) return {}
+
+    const groups: Record<string, typeof filteredProfiles> = {}
+
+    filteredProfiles.forEach(profile => {
       const categoryName = profile.category || 'Uncategorized'
       if (!groups[categoryName]) {
         groups[categoryName] = []
       }
       groups[categoryName].push(profile)
     })
-    
+
     return groups
-  }, [profiles])
+  }, [filteredProfiles])
 
   // Get category color
   const getCategoryColor = (categoryName: string) => {
@@ -89,6 +105,18 @@ export default function Profiles() {
             Add Profile
           </Button>
         </div>
+      </div>
+
+      {/* Search */}
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy-400" />
+        <Input
+          type="text"
+          placeholder="Search profiles by username, description, or category..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
       </div>
 
       {/* Profiles by Category */}
