@@ -11,7 +11,8 @@ interface SettingsState {
   defaultWebhook: string
   scrapePostsWebhook: string
   scrapeEngagersWebhook: string
-  clayWebhook: string
+  clayProxyUrl: string
+  clayWebhookUrl: string
   autoEnable: boolean
   refreshInterval: number
   dataRetentionDays: number
@@ -23,15 +24,17 @@ export default function Settings() {
   
   const [settings, setSettings] = useState<SettingsState>(() => {
     const saved = localStorage.getItem('app-settings')
-    return saved ? JSON.parse(saved) : {
-      defaultWebhook: '',
-      scrapePostsWebhook: 'https://lgn8nwebhookv2.up.railway.app/hook/linkedin-scrape-posts',
-      scrapeEngagersWebhook: 'https://lgn8nwebhookv2.up.railway.app/hook/linkedin-scrape-engagers',
-      clayWebhook: '',
-      autoEnable: true,
-      refreshInterval: 30,
-      dataRetentionDays: 90,
-      smartTagsEnabled: true,
+    const parsed = saved ? JSON.parse(saved) : {}
+    return {
+      defaultWebhook: parsed.defaultWebhook || '',
+      scrapePostsWebhook: parsed.scrapePostsWebhook || 'https://lgn8nwebhookv2.up.railway.app/hook/linkedin-scrape-posts',
+      scrapeEngagersWebhook: parsed.scrapeEngagersWebhook || 'https://lgn8nwebhookv2.up.railway.app/hook/linkedin-scrape-engagers',
+      clayProxyUrl: parsed.clayProxyUrl || '',
+      clayWebhookUrl: parsed.clayWebhookUrl || parsed.clayWebhook || '', // Migrate old clayWebhook
+      autoEnable: parsed.autoEnable ?? true,
+      refreshInterval: parsed.refreshInterval || 30,
+      dataRetentionDays: parsed.dataRetentionDays || 90,
+      smartTagsEnabled: parsed.smartTagsEnabled ?? true,
     }
   })
 
@@ -220,19 +223,35 @@ export default function Settings() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="clayWebhook">Clay Proxy URL</Label>
+              <Label htmlFor="clayProxyUrl">Clay Proxy URL</Label>
               <Input
-                id="clayWebhook"
+                id="clayProxyUrl"
                 type="url"
                 placeholder="https://your-clay-proxy.railway.app/push"
-                value={settings.clayWebhook}
+                value={settings.clayProxyUrl}
                 onChange={(e) =>
-                  setSettings({ ...settings, clayWebhook: e.target.value })
+                  setSettings({ ...settings, clayProxyUrl: e.target.value })
                 }
                 className="mt-1"
               />
               <p className="mt-1 text-xs text-navy-500 dark:text-navy-400">
-                Use the clay-proxy service URL (e.g., https://your-proxy.railway.app/push)
+                Your deployed clay-proxy service URL (ending with /push)
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="clayWebhookUrl">Clay Webhook URL</Label>
+              <Input
+                id="clayWebhookUrl"
+                type="url"
+                placeholder="https://app.clay.com/api/v1/webhook/..."
+                value={settings.clayWebhookUrl}
+                onChange={(e) =>
+                  setSettings({ ...settings, clayWebhookUrl: e.target.value })
+                }
+                className="mt-1"
+              />
+              <p className="mt-1 text-xs text-navy-500 dark:text-navy-400">
+                Your Clay table's webhook URL (from Clay dashboard)
               </p>
             </div>
             <div className="rounded-lg border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950 p-4">
@@ -241,8 +260,8 @@ export default function Settings() {
               </p>
               <ol className="text-sm text-blue-700 dark:text-blue-300 space-y-1 list-decimal list-inside">
                 <li>Deploy the <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">clay-proxy</code> folder to Railway</li>
-                <li>Set <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">CLAY_WEBHOOK_URL</code> env var to your Clay webhook</li>
-                <li>Paste the proxy URL above (ending with <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">/push</code>)</li>
+                <li>Copy the deployed URL and paste above as Proxy URL</li>
+                <li>Get your Clay webhook URL from Clay and paste above</li>
               </ol>
             </div>
           </CardContent>

@@ -62,48 +62,37 @@ export function usePushToClay() {
 
   const pushLead = useCallback(async (lead: LeadData): Promise<PushResult> => {
     const settings = getSettings()
-    const webhookUrl = settings.clayWebhook
+    const proxyUrl = settings.clayProxyUrl
+    const clayWebhookUrl = settings.clayWebhookUrl
 
-    if (!webhookUrl || !webhookUrl.trim()) {
-      return { success: false, message: 'No Clay webhook URL configured. Set it in Settings.' }
+    if (!proxyUrl || !proxyUrl.trim()) {
+      return { success: false, message: 'No Clay Proxy URL configured. Set it in Settings.' }
+    }
+
+    if (!clayWebhookUrl || !clayWebhookUrl.trim()) {
+      return { success: false, message: 'No Clay Webhook URL configured. Set it in Settings.' }
     }
 
     setIsPushing(true)
     try {
-      const payload = formatLeadPayload(lead)
-
-      // Check if using proxy (URL ends with /push or contains 'proxy')
-      const isProxy = webhookUrl.includes('/push') || webhookUrl.includes('proxy')
-
-      if (isProxy) {
-        // Using proxy service
-        const response = await fetch(webhookUrl.trim(), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        })
-
-        const data = await response.json()
-
-        if (!response.ok || !data.success) {
-          return { success: false, message: data.error || `Proxy returned ${response.status}` }
-        }
-
-        return { success: true, message: 'Lead pushed to Clay successfully' }
-      } else {
-        // Direct to Clay (might fail due to CORS)
-        const response = await fetch(webhookUrl.trim(), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        })
-
-        if (!response.ok) {
-          return { success: false, message: `Clay webhook returned ${response.status}` }
-        }
-
-        return { success: true, message: 'Lead pushed to Clay successfully' }
+      const payload = {
+        ...formatLeadPayload(lead),
+        _clayWebhookUrl: clayWebhookUrl.trim(), // Pass webhook URL to proxy
       }
+
+      const response = await fetch(proxyUrl.trim(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok || !data.success) {
+        return { success: false, message: data.error || `Proxy returned ${response.status}` }
+      }
+
+      return { success: true, message: 'Lead pushed to Clay successfully' }
     } catch (error) {
       console.error('Push to Clay error:', error)
       const msg = error instanceof Error ? error.message : 'Unknown error'
@@ -111,7 +100,7 @@ export function usePushToClay() {
       if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
         return {
           success: false,
-          message: 'CORS error: Use the clay-proxy service URL instead of Clay directly'
+          message: 'Connection error: Check your Clay Proxy URL'
         }
       }
 
@@ -123,69 +112,40 @@ export function usePushToClay() {
 
   const pushMultipleLeads = useCallback(async (leads: LeadData[]): Promise<PushResult> => {
     const settings = getSettings()
-    const webhookUrl = settings.clayWebhook
+    const proxyUrl = settings.clayProxyUrl
+    const clayWebhookUrl = settings.clayWebhookUrl
 
-    if (!webhookUrl || !webhookUrl.trim()) {
-      return { success: false, message: 'No Clay webhook URL configured. Set it in Settings.' }
+    if (!proxyUrl || !proxyUrl.trim()) {
+      return { success: false, message: 'No Clay Proxy URL configured. Set it in Settings.' }
+    }
+
+    if (!clayWebhookUrl || !clayWebhookUrl.trim()) {
+      return { success: false, message: 'No Clay Webhook URL configured. Set it in Settings.' }
     }
 
     setIsPushing(true)
     try {
-      // Check if using proxy (URL ends with /push or contains 'proxy')
-      const isProxy = webhookUrl.includes('/push') || webhookUrl.includes('proxy')
+      // Use batch endpoint
+      const batchUrl = proxyUrl.trim().replace(/\/push\/?$/, '/push/batch')
 
-      if (isProxy) {
-        // Using proxy service - use batch endpoint
-        const batchUrl = webhookUrl.replace(/\/push\/?$/, '/push/batch')
+      const response = await fetch(batchUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          leads: leads.map(formatLeadPayload),
+          _clayWebhookUrl: clayWebhookUrl.trim(), // Pass webhook URL to proxy
+        }),
+      })
 
-        const response = await fetch(batchUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            leads: leads.map(formatLeadPayload)
-          }),
-        })
+      const data = await response.json()
 
-        const data = await response.json()
+      if (!response.ok) {
+        return { success: false, message: data.error || `Proxy returned ${response.status}` }
+      }
 
-        if (!response.ok) {
-          return { success: false, message: data.error || `Proxy returned ${response.status}` }
-        }
-
-        return {
-          success: data.success,
-          message: data.message || `Pushed ${data.successCount || 0} leads`
-        }
-      } else {
-        // Direct to Clay - push one by one (might fail due to CORS)
-        let successCount = 0
-        let failCount = 0
-
-        for (const lead of leads) {
-          try {
-            const response = await fetch(webhookUrl.trim(), {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(formatLeadPayload(lead)),
-            })
-
-            if (response.ok) {
-              successCount++
-            } else {
-              failCount++
-            }
-          } catch {
-            failCount++
-          }
-        }
-
-        if (failCount === 0) {
-          return { success: true, message: `Pushed ${successCount} leads to Clay` }
-        } else if (successCount === 0) {
-          return { success: false, message: `Failed to push ${failCount} leads` }
-        } else {
-          return { success: true, message: `Pushed ${successCount} leads, ${failCount} failed` }
-        }
+      return {
+        success: data.success,
+        message: data.message || `Pushed ${data.successCount || 0} leads`
       }
     } catch (error) {
       console.error('Push to Clay error:', error)
@@ -194,7 +154,7 @@ export function usePushToClay() {
       if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
         return {
           success: false,
-          message: 'CORS error: Use the clay-proxy service URL instead of Clay directly'
+          message: 'Connection error: Check your Clay Proxy URL'
         }
       }
 

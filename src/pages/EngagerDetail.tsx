@@ -21,9 +21,9 @@ export default function EngagerDetail() {
     const doPush = async () => {
       const result = await pushLead(engager)
 
-      // Check if webhook needs configuration
-      if (!result.success && result.message.includes('No Clay webhook URL configured')) {
-        showActionToast('Add your Clay webhook URL to push leads', 'clay-webhook', doPush)
+      // Check if settings need configuration
+      if (!result.success && (result.message.includes('No Clay Proxy URL') || result.message.includes('No Clay Webhook URL'))) {
+        showActionToast('Configure Clay integration to push leads', 'clay-webhook', doPush)
         return
       }
 
