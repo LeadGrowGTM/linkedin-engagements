@@ -224,19 +224,32 @@ export default function Settings() {
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="clayProxyUrl">Clay Proxy URL</Label>
-              <Input
-                id="clayProxyUrl"
-                type="url"
-                placeholder="https://your-clay-proxy.railway.app/push"
-                value={settings.clayProxyUrl}
-                onChange={(e) =>
-                  setSettings({ ...settings, clayProxyUrl: e.target.value })
-                }
-                className="mt-1"
-              />
-              <p className="mt-1 text-xs text-navy-500 dark:text-navy-400">
-                Your deployed clay-proxy service URL (ending with /push)
-              </p>
+              {import.meta.env.VITE_CLAY_PROXY_URL ? (
+                <div className="mt-1 p-2 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-md">
+                  <p className="text-sm text-green-700 dark:text-green-300">
+                    ✓ Set via environment variable
+                  </p>
+                  <p className="text-xs text-green-600 dark:text-green-400 mt-1 font-mono truncate">
+                    {import.meta.env.VITE_CLAY_PROXY_URL}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <Input
+                    id="clayProxyUrl"
+                    type="url"
+                    placeholder="https://your-clay-proxy.railway.app/push"
+                    value={settings.clayProxyUrl}
+                    onChange={(e) =>
+                      setSettings({ ...settings, clayProxyUrl: e.target.value })
+                    }
+                    className="mt-1"
+                  />
+                  <p className="mt-1 text-xs text-navy-500 dark:text-navy-400">
+                    Or set <code className="bg-navy-100 dark:bg-navy-800 px-1 rounded">VITE_CLAY_PROXY_URL</code> in Railway
+                  </p>
+                </>
+              )}
             </div>
             <div>
               <Label htmlFor="clayWebhookUrl">Clay Webhook URL</Label>
@@ -260,7 +273,7 @@ export default function Settings() {
               </p>
               <ol className="text-sm text-blue-700 dark:text-blue-300 space-y-1 list-decimal list-inside">
                 <li>Deploy the <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">clay-proxy</code> folder to Railway</li>
-                <li>Copy the deployed URL and paste above as Proxy URL</li>
+                <li>Set <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">VITE_CLAY_PROXY_URL</code> env var in dashboard's Railway service</li>
                 <li>Get your Clay webhook URL from Clay and paste above</li>
               </ol>
             </div>

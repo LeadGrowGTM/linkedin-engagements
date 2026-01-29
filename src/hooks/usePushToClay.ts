@@ -25,6 +25,9 @@ interface PushResult {
   message: string
 }
 
+// Proxy URL from environment variable (set in Railway)
+const CLAY_PROXY_URL = import.meta.env.VITE_CLAY_PROXY_URL || ''
+
 function getSettings() {
   try {
     const saved = localStorage.getItem('app-settings')
@@ -62,11 +65,11 @@ export function usePushToClay() {
 
   const pushLead = useCallback(async (lead: LeadData): Promise<PushResult> => {
     const settings = getSettings()
-    const proxyUrl = settings.clayProxyUrl
+    const proxyUrl = CLAY_PROXY_URL || settings.clayProxyUrl // Env var takes priority
     const clayWebhookUrl = settings.clayWebhookUrl
 
     if (!proxyUrl || !proxyUrl.trim()) {
-      return { success: false, message: 'No Clay Proxy URL configured. Set it in Settings.' }
+      return { success: false, message: 'No Clay Proxy URL configured. Set VITE_CLAY_PROXY_URL in Railway.' }
     }
 
     if (!clayWebhookUrl || !clayWebhookUrl.trim()) {
@@ -112,11 +115,11 @@ export function usePushToClay() {
 
   const pushMultipleLeads = useCallback(async (leads: LeadData[]): Promise<PushResult> => {
     const settings = getSettings()
-    const proxyUrl = settings.clayProxyUrl
+    const proxyUrl = CLAY_PROXY_URL || settings.clayProxyUrl // Env var takes priority
     const clayWebhookUrl = settings.clayWebhookUrl
 
     if (!proxyUrl || !proxyUrl.trim()) {
-      return { success: false, message: 'No Clay Proxy URL configured. Set it in Settings.' }
+      return { success: false, message: 'No Clay Proxy URL configured. Set VITE_CLAY_PROXY_URL in Railway.' }
     }
 
     if (!clayWebhookUrl || !clayWebhookUrl.trim()) {
