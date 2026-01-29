@@ -198,6 +198,8 @@ export default function Engagers() {
       created_at: e.createdAt,
       last_enriched_at: e.lastEnrichedAt,
       raw_data: e.rawData,
+      engagement_type: e.engagementType,
+      engagement_value: e.engagementValue,
     }))
 
     const doPush = async () => {

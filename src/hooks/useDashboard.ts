@@ -136,6 +136,8 @@ export function useEngagersTracked(timeRange: TimeRange = 7) {
           createdAt: engager.created_at,
           lastEnrichedAt: engager.last_enriched_at,
           rawData: engager.raw_data,
+          engagementType: engager.engagement_type,
+          engagementValue: engager.engagement_value,
         }
       })
 

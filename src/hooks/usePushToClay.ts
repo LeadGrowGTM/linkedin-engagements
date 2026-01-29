@@ -33,6 +33,9 @@ interface LeadData {
   created_at?: string | null
   last_enriched_at?: string | null
   raw_data?: unknown
+  // Engagement data
+  engagement_type?: string | null
+  engagement_value?: string | null
 }
 
 interface PushResult {
@@ -95,6 +98,10 @@ function formatLeadPayload(lead: LeadData) {
     // Tenure
     totalTenureMonths: lead.totalTenureMonths,
     totalTenureDays: lead.totalTenureDays,
+
+    // Engagement data
+    engagement_type: lead.engagement_type,
+    engagement_value: lead.engagement_value,
 
     // Metadata
     parent_profile: lead.parent_profile,

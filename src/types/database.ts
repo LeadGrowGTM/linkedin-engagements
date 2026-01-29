@@ -162,6 +162,8 @@ export interface Database {
           urn: string | null
           educations: Json | null
           parent_profile: string | null
+          engagement_type: string | null
+          engagement_value: string | null
         }
         Insert: {
           profile_url: string
