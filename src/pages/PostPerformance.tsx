@@ -1,6 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ExternalLink, TrendingUp, Users, Calendar, FileText, RefreshCw, CheckCircle, Clock, Zap } from 'lucide-react'
+import { ArrowLeft, ExternalLink, TrendingUp, Users, Calendar, FileText, RefreshCw, CheckCircle, Clock, Zap, ChevronDown, ChevronRight } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -14,6 +14,9 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { usePostPerformance, useUpdatePostStatus } from '@/hooks/usePostPerformance'
+import type { Database } from '@/types/database'
+
+type EnrichedProfile = Database['linkedin']['Tables']['enriched_profiles']['Row']
 import { useTriggerScrapeEngagers } from '@/hooks/useTriggerScrape'
 import { parseLinkedInUsername, formatDate, formatNumber, cn } from '@/lib/utils'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
@@ -26,7 +29,17 @@ export default function PostPerformance() {
   const { data, isLoading } = usePostPerformance(decodedUrl)
   const updatePostStatus = useUpdatePostStatus()
   const { trigger: triggerEngagers, isTriggering, result: engagerResult, clearResult } = useTriggerScrapeEngagers()
+  const [expandedPosts, setExpandedPosts] = useState<Set<number>>(new Set())
   const username = parseLinkedInUsername(decodedUrl)
+
+  const togglePostExpanded = (postId: number) => {
+    setExpandedPosts(prev => {
+      const next = new Set(prev)
+      if (next.has(postId)) next.delete(postId)
+      else next.add(postId)
+      return next
+    })
+  }
 
   useEffect(() => {
     if (engagerResult) {
@@ -282,73 +295,149 @@ export default function PostPerformance() {
         <CardContent>
           {data?.posts && data.posts.length > 0 ? (
             <div className="space-y-3">
-              {data.posts.map((post) => (
-                <div
-                  key={post.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-navy-200 dark:border-navy-800 hover:bg-navy-50 dark:hover:bg-navy-900 transition-colors"
-                >
-                  <div className="flex-1 min-w-0 mr-4">
-                    <div className="flex items-center gap-3 flex-wrap mb-1">
-                      {getStatusBadge(post.status)}
-                    </div>
-                    {post.post_text && (
-                      <p className="text-sm text-navy-900 dark:text-navy-50 mb-2 line-clamp-2">
-                        {post.post_text}
-                      </p>
-                    )}
-                    
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-navy-500 dark:text-navy-400">
-                      {post.posted_at_timestamp && (
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3.5 w-3.5" />
-                          Posted: {formatDate(post.posted_at_timestamp)}
-                        </span>
-                      )}
-                      {post.created_at && (
-                        <span className="flex items-center gap-1">
-                          <FileText className="h-3.5 w-3.5" />
-                          Tracked: {formatDate(post.created_at)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+              {data.posts.map((post) => {
+                const isExpanded = expandedPosts.has(post.id)
+                const postEngagers: EnrichedProfile[] = post.engagers || []
+                return (
+                  <div
+                    key={post.id}
+                    className="rounded-lg border border-navy-200 dark:border-navy-800 transition-colors"
+                  >
+                    <div className="flex items-center justify-between p-4 hover:bg-navy-50 dark:hover:bg-navy-900">
+                      <div className="flex-1 min-w-0 mr-4">
+                        <div className="flex items-center gap-3 flex-wrap mb-1">
+                          {getStatusBadge(post.status)}
+                          {postEngagers.length > 0 && (
+                            <button
+                              onClick={() => togglePostExpanded(post.id)}
+                              className="flex items-center gap-1 text-xs text-primary-600 dark:text-primary-400 hover:underline"
+                            >
+                              {isExpanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+                              <Users className="h-3.5 w-3.5" />
+                              {postEngagers.length} engager{postEngagers.length !== 1 ? 's' : ''}
+                            </button>
+                          )}
+                        </div>
+                        {post.post_text && (
+                          <p className="text-sm text-navy-900 dark:text-navy-50 mb-2 line-clamp-2">
+                            {post.post_text}
+                          </p>
+                        )}
 
-                  <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
-                    {engagerResult && (
-                      <span className={`text-xs ${engagerResult.success ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                        {engagerResult.message}
-                      </span>
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-navy-500 dark:text-navy-400">
+                          {post.posted_at_timestamp && (
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-3.5 w-3.5" />
+                              Posted: {formatDate(post.posted_at_timestamp)}
+                            </span>
+                          )}
+                          {post.created_at && (
+                            <span className="flex items-center gap-1">
+                              <FileText className="h-3.5 w-3.5" />
+                              Tracked: {formatDate(post.created_at)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+                        {engagerResult && (
+                          <span className={`text-xs ${engagerResult.success ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                            {engagerResult.message}
+                          </span>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open(post.post_url, '_blank')}
+                        >
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          View Post
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => handleScrapeAgain(post.id)}
+                          disabled={updatePostStatus.isPending}
+                        >
+                          <RefreshCw className={cn("h-4 w-4 mr-2", updatePostStatus.isPending && "animate-spin")} />
+                          Scrape Again
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={triggerEngagers}
+                          disabled={isTriggering}
+                          className="gap-1"
+                        >
+                          <Zap className={`h-4 w-4 ${isTriggering ? 'animate-pulse' : ''}`} />
+                          {isTriggering ? 'Triggering...' : 'Scrape Engagers'}
+                        </Button>
+                      </div>
+                    </div>
+
+                    {isExpanded && postEngagers.length > 0 && (
+                      <div className="border-t border-navy-200 dark:border-navy-800 bg-navy-50/50 dark:bg-navy-900/50">
+                        <div className="px-4 py-2">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead className="w-[220px]">Name</TableHead>
+                                <TableHead className="min-w-[180px]">Headline</TableHead>
+                                <TableHead className="w-[160px]">Company</TableHead>
+                                <TableHead className="w-[140px]">Location</TableHead>
+                                <TableHead className="w-[100px] text-right">Connections</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {postEngagers.map((engager) => (
+                                <TableRow
+                                  key={engager.profile_url}
+                                  className="cursor-pointer hover:bg-muted/50"
+                                  onClick={() => navigate(`/engagers/${encodeURIComponent(engager.profile_url)}`)}
+                                >
+                                  <TableCell>
+                                    <div className="flex items-center gap-2">
+                                      <div className="h-8 w-8 flex-shrink-0 rounded-full bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center">
+                                        <span className="text-white font-semibold text-xs">
+                                          {engager.full_name?.charAt(0).toUpperCase() || 'U'}
+                                        </span>
+                                      </div>
+                                      <span className="font-medium text-sm text-foreground truncate">
+                                        {engager.full_name || 'Unknown'}
+                                      </span>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>
+                                    <span className="text-sm text-muted-foreground truncate block">
+                                      {engager.headline || 'N/A'}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell>
+                                    <span className="text-sm text-foreground">
+                                      {engager.company_name || 'N/A'}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell>
+                                    <span className="text-sm text-muted-foreground">
+                                      {engager.location || 'N/A'}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    <span className="text-sm font-medium text-foreground">
+                                      {engager.connections ? formatNumber(engager.connections) : 'N/A'}
+                                    </span>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </div>
                     )}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => window.open(post.post_url, '_blank')}
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      View Post
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => handleScrapeAgain(post.id)}
-                      disabled={updatePostStatus.isPending}
-                    >
-                      <RefreshCw className={cn("h-4 w-4 mr-2", updatePostStatus.isPending && "animate-spin")} />
-                      Scrape Again
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={triggerEngagers}
-                      disabled={isTriggering}
-                      className="gap-1"
-                    >
-                      <Zap className={`h-4 w-4 ${isTriggering ? 'animate-pulse' : ''}`} />
-                      {isTriggering ? 'Triggering...' : 'Scrape Engagers'}
-                    </Button>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           ) : (
             <div className="text-center py-12">

@@ -22,6 +22,32 @@ export function usePostPerformance(profileUrl: string) {
 
       if (engagersError) throw engagersError
 
+      // Get post_engagements to map engagers to specific posts
+      const postUrls = (posts || []).map(p => p.post_url)
+      const { data: postEngagements, error: peError } = postUrls.length > 0
+        ? await supabase
+            .from('post_engagements')
+            .select('engager_profile_url, post_url, engagement_type')
+            .in('post_url', postUrls)
+        : { data: [], error: null }
+
+      if (peError) throw peError
+
+      // Build a map of post_url -> engager profile URLs
+      const postEngagerMap = new Map<string, Set<string>>()
+      ;(postEngagements || []).forEach(pe => {
+        if (!postEngagerMap.has(pe.post_url)) {
+          postEngagerMap.set(pe.post_url, new Set())
+        }
+        postEngagerMap.get(pe.post_url)!.add(pe.engager_profile_url)
+      })
+
+      // Build a lookup of engagers by profile URL
+      const engagerLookup = new Map<string, typeof engagers[0]>()
+      ;(engagers || []).forEach(e => {
+        engagerLookup.set(e.profile_url, e)
+      })
+
       const allEngagers = engagers || []
 
       // Industry breakdown
@@ -79,10 +105,17 @@ export function usePostPerformance(profileUrl: string) {
         .sort((a, b) => a.date.localeCompare(b.date))
         .slice(-30)
 
-      // Map posts
-      const postsData = (posts || []).map(post => ({
-        ...post,
-      }))
+      // Map posts with per-post engagers
+      const postsData = (posts || []).map(post => {
+        const engagerUrls = postEngagerMap.get(post.post_url) || new Set<string>()
+        const postEngagers = Array.from(engagerUrls)
+          .map(url => engagerLookup.get(url))
+          .filter((e): e is NonNullable<typeof e> => Boolean(e))
+        return {
+          ...post,
+          engagers: postEngagers,
+        }
+      })
 
       return {
         posts: postsData,
