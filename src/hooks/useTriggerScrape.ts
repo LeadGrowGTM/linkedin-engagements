@@ -8,9 +8,16 @@ interface TriggerResult {
 function getSettings() {
   try {
     const saved = localStorage.getItem('app-settings')
-    return saved ? JSON.parse(saved) : {}
+    const parsed = saved ? JSON.parse(saved) : {}
+    return {
+      scrapePostsWebhook: parsed.scrapePostsWebhook || 'https://lgn8nwebhookv2.up.railway.app/hook/linkedin-scrape-posts',
+      scrapeEngagersWebhook: parsed.scrapeEngagersWebhook || 'https://lgn8nwebhookv2.up.railway.app/hook/linkedin-scrape-engagers',
+    }
   } catch {
-    return {}
+    return {
+      scrapePostsWebhook: 'https://lgn8nwebhookv2.up.railway.app/hook/linkedin-scrape-posts',
+      scrapeEngagersWebhook: 'https://lgn8nwebhookv2.up.railway.app/hook/linkedin-scrape-engagers',
+    }
   }
 }
 
