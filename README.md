@@ -103,12 +103,18 @@ Set up a cron job to scrape automatically:
 
 ## Cost
 
-Each full scrape uses ~$0.36 in Apify credits:
-- Post scraping: ~$0.01 per profile
-- Reactions + comments: ~$0.05 per post
-- Profile enrichment: ~$0.10 per new engager
+Apify pricing (per 1,000 units):
 
-Apify gives $5 free monthly credit, enough for regular monitoring of several profiles.
+| Step | Rate |
+|------|------|
+| Post scraping | $1 / 1k posts |
+| Reaction scraping | $2 / 1k reactions |
+| Comment scraping | $2 / 1k comments |
+| Profile enrichment | $3 / 1k profiles |
+
+**Total cost per engager: ~$0.005** ($0.002 for the reaction/comment + $0.003 for profile enrichment).
+
+Apify gives $5 free monthly credit -- enough to scrape ~1,000 engagers per month.
 
 ## API Endpoints
 
