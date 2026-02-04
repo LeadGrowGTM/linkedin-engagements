@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Frontend-only React dashboard for tracking LinkedIn profile engagement. Monitors posts, tracks engagers, scores leads, and provides analytics. No backend server -- all data operations go directly to Supabase via the TypeScript client.
+React dashboard + REST API for tracking LinkedIn profile engagement. Monitors posts, tracks engagers, scores leads, and provides analytics. The frontend reads data directly from Supabase via the TypeScript client. The API server (`api-server/`) provides programmatic access for automation and integrations.
 
 ## Tech Stack
 
@@ -13,15 +13,20 @@ Frontend-only React dashboard for tracking LinkedIn profile engagement. Monitors
 - **Styling**: Tailwind CSS 3 + shadcn/ui (Radix-based) + Headless UI
 - **Charts**: Recharts
 - **Icons**: Lucide React (24x24 default)
+- **API Server**: Express.js 4 + Supabase service_role + zod validation
 - **Deployment**: Railway via Nixpacks (Node 20, `serve` for static files)
 
 ## Commands
 
 ```bash
+# Frontend
 npm run dev       # Vite dev server at localhost:5173
 npm run build     # tsc && vite build -> dist/
 npm run preview   # Vite preview at localhost:4173
 npm run serve     # serve dist -s -l ${PORT:-4173} (production/Railway)
+
+# API Server
+cd api-server && npm run dev   # Express server at localhost:3001
 ```
 
 ## Project Structure
@@ -64,6 +69,27 @@ src/
     database.ts              # Supabase generated types (Database interface)
 migrations/                  # SQL migration files (001-004)
 *.json (root)                # n8n workflow exports (Part 1, 2, 3) -- data ingestion pipeline
+api-server/
+  index.js                   # Express app entry point
+  lib/
+    supabase.js              # Supabase client (service_role key, schema: 'linkedin')
+    lead-scoring.js          # Server-side lead scoring (0-100, Hot/Warm/Cold)
+    webhook.js               # Webhook delivery with retries + formatLeadPayload()
+  middleware/
+    auth.js                  # x-api-key header validation
+    validate.js              # Zod schema validation factory
+    error-handler.js         # Global error handler
+  routes/
+    profiles.js              # POST/GET/PATCH/DELETE /api/profiles
+    scrape.js                # POST /api/scrape/posts, POST /api/scrape/engagers
+    engagers.js              # GET /api/engagers (webhook delivery), GET /api/engagers/:profileUrl
+    posts.js                 # GET /api/posts
+    search.js                # GET /api/search
+    export.js                # GET /api/export/engagers (CSV download)
+  schemas/
+    profiles.js              # Zod schemas for profile validation
+    engagers.js              # Zod schemas for engager query params
+clay-proxy/                  # CORS proxy for Clay webhook (separate Railway service)
 ```
 
 ## Architecture Patterns
@@ -82,8 +108,8 @@ Supabase PostgreSQL -> React Query hooks (30s stale time, 1 retry, no refetch on
 - `search_engagers_by_keyword(TEXT)` -- Returns engagers with matching post text (ILIKE), joined with enriched_profiles
 - `search_engagers_by_keyword_grouped(TEXT)` -- Same but grouped by person with engagement counts and post URL arrays
 
-### Lead Scoring (computed client-side)
-Weighted score (0-100): Connections (25%) + Followers (25%) + Company Size (25%) + Seniority (25%). Categories: Hot (70-100), Warm (40-69), Cold (0-39).
+### Lead Scoring (client-side and API server-side)
+Weighted score (0-100): Connections (25%) + Followers (25%) + Company Size (25%) + Seniority (25%). Categories: Hot (70-100), Warm (40-69), Cold (0-39). Computed in `src/hooks/useDashboard.ts` (frontend) and `api-server/lib/lead-scoring.js` (API).
 
 ## Coding Conventions
 
@@ -98,12 +124,22 @@ Weighted score (0-100): Connections (25%) + Followers (25%) + Company Size (25%)
 
 ## Environment Variables
 
+### Frontend (must be prefixed with `VITE_`)
 ```
 VITE_SUPABASE_URL        # Supabase project URL
 VITE_SUPABASE_ANON_KEY   # Supabase anon/public key (NOT service key)
 ```
 
-All client-side env vars must be prefixed with `VITE_`.
+### API Server (`api-server/.env`)
+```
+SUPABASE_URL             # Supabase project URL
+SUPABASE_SERVICE_KEY     # Supabase service_role key (full access)
+API_KEYS                 # Comma-separated API keys for x-api-key auth
+PORT                     # Optional, default 3001 (Railway sets automatically)
+N8N_SCRAPE_POSTS_WEBHOOK    # Optional, default: https://lgn8nwebhookv2.up.railway.app/hook/linkedin-scrape-posts
+N8N_SCRAPE_ENGAGERS_WEBHOOK # Optional, default: https://lgn8nwebhookv2.up.railway.app/hook/linkedin-scrape-engagers
+ALLOWED_ORIGIN           # Optional, CORS origin (default: *)
+```
 
 ## n8n Workflow Pipeline (Data Ingestion)
 
@@ -174,6 +210,45 @@ Run `npx shadcn@latest add <component>` or manually create in `src/components/ui
 ### Database migrations
 SQL files in `migrations/` directory. Run manually against Supabase SQL editor. Numbered sequentially (001, 002, ...).
 
+## REST API Server
+
+Express.js API at `api-server/`, deployed as a separate Railway service at `https://lg-linkedinmonitor-api.up.railway.app`. Auth via `x-api-key` header.
+
+### API Endpoints
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/profiles` | Add profile with optional webhooks |
+| `GET` | `/api/profiles` | List profiles (`?enabled=`, `?category=`) |
+| `GET` | `/api/profiles/:profileUrl` | Single profile with stats |
+| `PATCH` | `/api/profiles/:profileUrl` | Update profile |
+| `DELETE` | `/api/profiles/:profileUrl` | Delete profile |
+| `POST` | `/api/scrape/posts` | Trigger n8n Part 1 |
+| `POST` | `/api/scrape/engagers` | Trigger n8n Part 2 |
+| `GET` | `/api/engagers` | Fetch + push to webhook (with lead scoring) |
+| `GET` | `/api/engagers/:profileUrl` | Single engager detail |
+| `GET` | `/api/posts` | List posts (`?profile_url=`, `?status=`) |
+| `GET` | `/api/search` | Keyword search (`?keyword=`, `?grouped=`) |
+| `GET` | `/api/export/engagers` | CSV download with filters |
+| `GET` | `/api/health` | Health check (public) |
+
+### GET /api/engagers Webhook Behavior
+1. If `?webhook=<url>` provided -- push to that URL, overrides profile webhooks
+2. If no `?webhook` but `?parent_profile` set -- uses profile's stored `webhooks` array
+3. If no webhook anywhere -- returns 400 error
+4. Add `?include_data=true` to include engager data in response (default: delivery results only)
+
+### Adding an API endpoint
+1. Create route handler in `api-server/routes/`
+2. Add zod schema in `api-server/schemas/` if needed
+3. Register route in `api-server/index.js`
+
 ## Deployment
 
+### Frontend
 Railway auto-deploys from GitHub. Build: `npm ci && npm run build`. Start: `serve dist -s -l $PORT`. The `-s` flag enables SPA mode (all routes serve index.html).
+
+### API Server
+Separate Railway service, root directory: `api-server`. Start: `node index.js`. URL: `https://lg-linkedinmonitor-api.up.railway.app`.
+
+### Clay Proxy
+Separate Railway service, root directory: `clay-proxy`. Start: `node index.js`. URL: `https://lg-clay-proxy.up.railway.app`.
