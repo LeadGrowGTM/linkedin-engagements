@@ -1,5 +1,6 @@
+import { useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ExternalLink, TrendingUp, Users, Calendar, FileText, RefreshCw, CheckCircle, Clock } from 'lucide-react'
+import { ArrowLeft, ExternalLink, TrendingUp, Users, Calendar, FileText, RefreshCw, CheckCircle, Clock, Zap } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -13,6 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { usePostPerformance, useUpdatePostStatus } from '@/hooks/usePostPerformance'
+import { useTriggerScrapeEngagers } from '@/hooks/useTriggerScrape'
 import { parseLinkedInUsername, formatDate, formatNumber, cn } from '@/lib/utils'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
@@ -23,7 +25,15 @@ export default function PostPerformance() {
   
   const { data, isLoading } = usePostPerformance(decodedUrl)
   const updatePostStatus = useUpdatePostStatus()
+  const { trigger: triggerEngagers, isTriggering, result: engagerResult, clearResult } = useTriggerScrapeEngagers()
   const username = parseLinkedInUsername(decodedUrl)
+
+  useEffect(() => {
+    if (engagerResult) {
+      const timer = setTimeout(clearResult, 4000)
+      return () => clearTimeout(timer)
+    }
+  }, [engagerResult, clearResult])
 
   const getStatusBadge = (status: string | null) => {
     switch (status?.toUpperCase()) {
@@ -86,15 +96,32 @@ export default function PostPerformance() {
             </p>
           </div>
         </div>
-        <a
-          href={decodedUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:underline"
-        >
-          <ExternalLink className="h-4 w-4" />
-          View Profile
-        </a>
+        <div className="flex items-center gap-3">
+          {engagerResult && (
+            <span className={`text-sm ${engagerResult.success ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+              {engagerResult.message}
+            </span>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={triggerEngagers}
+            disabled={isTriggering}
+            className="gap-2"
+          >
+            <Zap className={`h-4 w-4 ${isTriggering ? 'animate-pulse' : ''}`} />
+            {isTriggering ? 'Triggering...' : 'Scrape Engagers'}
+          </Button>
+          <a
+            href={decodedUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:underline"
+          >
+            <ExternalLink className="h-4 w-4" />
+            View Profile
+          </a>
+        </div>
       </div>
 
       {/* Summary Cards */}
