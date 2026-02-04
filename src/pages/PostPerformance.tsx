@@ -178,27 +178,27 @@ export default function PostPerformance() {
         <TabsContent value="overview" className="space-y-6">
           {/* Analytics Grid */}
           <div className="grid gap-6 lg:grid-cols-3">
-        {/* Top Industries */}
+        {/* Top Skills */}
         <Card>
           <CardHeader>
-            <CardTitle>Top Industries</CardTitle>
-            <CardDescription>Engager distribution by industry</CardDescription>
+            <CardTitle>Top Skills</CardTitle>
+            <CardDescription>Most common skills among engagers</CardDescription>
           </CardHeader>
           <CardContent>
-            {data?.industryBreakdown && data.industryBreakdown.length > 0 ? (
+            {data?.skillsBreakdown && data.skillsBreakdown.length > 0 ? (
               <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={data.industryBreakdown}>
+                <BarChart data={data.skillsBreakdown}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-navy-200 dark:stroke-navy-800" />
-                  <XAxis 
-                    dataKey="name" 
-                    angle={-45} 
-                    textAnchor="end" 
+                  <XAxis
+                    dataKey="name"
+                    angle={-45}
+                    textAnchor="end"
                     height={100}
                     className="text-xs fill-navy-600 dark:fill-navy-400"
                   />
                   <YAxis className="fill-navy-600 dark:fill-navy-400" />
-                  <Tooltip 
-                    contentStyle={{ 
+                  <Tooltip
+                    contentStyle={{
                       backgroundColor: 'rgba(255, 255, 255, 0.95)',
                       border: '1px solid #e5e7eb',
                       borderRadius: '6px'
@@ -208,32 +208,32 @@ export default function PostPerformance() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-center text-navy-500 py-12">No industry data available</p>
+              <p className="text-center text-navy-500 py-12">No skills data available</p>
             )}
           </CardContent>
         </Card>
 
-        {/* Company Size Distribution */}
+        {/* Top Titles */}
         <Card>
           <CardHeader>
-            <CardTitle>Company Size Distribution</CardTitle>
-            <CardDescription>Engagers by company size</CardDescription>
+            <CardTitle>Top Titles</CardTitle>
+            <CardDescription>Current job titles of engagers</CardDescription>
           </CardHeader>
           <CardContent>
-            {data?.companySizeBreakdown && data.companySizeBreakdown.length > 0 ? (
+            {data?.titlesBreakdown && data.titlesBreakdown.length > 0 ? (
               <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={data.companySizeBreakdown}>
+                <BarChart data={data.titlesBreakdown}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-navy-200 dark:stroke-navy-800" />
-                  <XAxis 
-                    dataKey="name" 
-                    angle={-45} 
-                    textAnchor="end" 
+                  <XAxis
+                    dataKey="name"
+                    angle={-45}
+                    textAnchor="end"
                     height={100}
                     className="text-xs fill-navy-600 dark:fill-navy-400"
                   />
                   <YAxis className="fill-navy-600 dark:fill-navy-400" />
-                  <Tooltip 
-                    contentStyle={{ 
+                  <Tooltip
+                    contentStyle={{
                       backgroundColor: 'rgba(255, 255, 255, 0.95)',
                       border: '1px solid #e5e7eb',
                       borderRadius: '6px'
@@ -243,7 +243,7 @@ export default function PostPerformance() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-center text-navy-500 py-12">No company size data available</p>
+              <p className="text-center text-navy-500 py-12">No title data available</p>
             )}
           </CardContent>
         </Card>

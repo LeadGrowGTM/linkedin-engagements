@@ -50,28 +50,35 @@ export function usePostPerformance(profileUrl: string) {
 
       const allEngagers = engagers || []
 
-      // Industry breakdown
-      const industryMap = new Map<string, number>()
+      // Skills breakdown
+      const skillsMap = new Map<string, number>()
       allEngagers.forEach(e => {
-        if (e.company_industry) {
-          industryMap.set(e.company_industry, (industryMap.get(e.company_industry) || 0) + 1)
-        }
+        const skills = Array.isArray(e.skills) ? e.skills : []
+        skills.forEach((skill: any) => {
+          const name = typeof skill === 'string' ? skill : skill?.name || skill?.skill
+          if (name) {
+            skillsMap.set(name, (skillsMap.get(name) || 0) + 1)
+          }
+        })
       })
-      const industryBreakdown = Array.from(industryMap.entries())
+      const skillsBreakdown = Array.from(skillsMap.entries())
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value)
-        .slice(0, 5)
+        .slice(0, 8)
 
-      // Company size breakdown
-      const sizeMap = new Map<string, number>()
+      // Titles breakdown (first entry in experience)
+      const titlesMap = new Map<string, number>()
       allEngagers.forEach(e => {
-        if (e.company_size) {
-          sizeMap.set(e.company_size, (sizeMap.get(e.company_size) || 0) + 1)
+        const experiences = Array.isArray(e.experience) ? e.experience : []
+        const title = experiences[0]?.title || experiences[0]?.position
+        if (title) {
+          titlesMap.set(title, (titlesMap.get(title) || 0) + 1)
         }
       })
-      const companySizeBreakdown = Array.from(sizeMap.entries())
+      const titlesBreakdown = Array.from(titlesMap.entries())
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value)
+        .slice(0, 8)
 
       // Location breakdown
       const locationMap = new Map<string, number>()
@@ -121,8 +128,8 @@ export function usePostPerformance(profileUrl: string) {
         posts: postsData,
         totalEngagers: allEngagers.length,
         totalPosts: posts?.length || 0,
-        industryBreakdown,
-        companySizeBreakdown,
+        skillsBreakdown,
+        titlesBreakdown,
         locationBreakdown,
         topEngagers,
         allEngagers: sortedEngagers,
