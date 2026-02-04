@@ -1,0 +1,17 @@
+{
+  "name": "linkedin-scraper-scripts",
+  "version": "1.0.0",
+  "description": "Automation scripts for LinkedIn engagement scraping",
+  "scripts": {
+    "scrape-posts": "node scrape-posts.js",
+    "scrape-engagers": "node scrape-engagers.js",
+    "run-all": "node run-all.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "dotenv": "^16.4.7"
+  }
+}
