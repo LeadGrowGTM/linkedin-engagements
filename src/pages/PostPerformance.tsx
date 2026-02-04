@@ -378,15 +378,14 @@ export default function PostPerformance() {
 
                     {isExpanded && postEngagers.length > 0 && (
                       <div className="border-t border-navy-200 dark:border-navy-800 bg-navy-50/50 dark:bg-navy-900/50">
-                        <div className="px-4 py-2">
+                        <div className="overflow-x-auto px-4 py-2">
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead className="w-[220px]">Name</TableHead>
-                                <TableHead className="min-w-[180px]">Headline</TableHead>
-                                <TableHead className="w-[160px]">Company</TableHead>
-                                <TableHead className="w-[140px]">Location</TableHead>
-                                <TableHead className="w-[100px] text-right">Connections</TableHead>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Headline</TableHead>
+                                <TableHead>Company</TableHead>
+                                <TableHead>Connections</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -398,29 +397,24 @@ export default function PostPerformance() {
                                 >
                                   <TableCell>
                                     <div className="flex items-center gap-2">
-                                      <div className="h-8 w-8 flex-shrink-0 rounded-full bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center">
+                                      <div className="h-7 w-7 flex-shrink-0 rounded-full bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center">
                                         <span className="text-white font-semibold text-xs">
                                           {engager.full_name?.charAt(0).toUpperCase() || 'U'}
                                         </span>
                                       </div>
-                                      <span className="font-medium text-sm text-foreground truncate">
+                                      <span className="font-medium text-sm text-foreground whitespace-nowrap">
                                         {engager.full_name || 'Unknown'}
                                       </span>
                                     </div>
                                   </TableCell>
                                   <TableCell>
-                                    <span className="text-sm text-muted-foreground truncate block">
+                                    <span className="text-sm text-muted-foreground line-clamp-1">
                                       {engager.headline || 'N/A'}
                                     </span>
                                   </TableCell>
                                   <TableCell>
-                                    <span className="text-sm text-foreground">
+                                    <span className="text-sm text-foreground whitespace-nowrap">
                                       {engager.company_name || 'N/A'}
-                                    </span>
-                                  </TableCell>
-                                  <TableCell>
-                                    <span className="text-sm text-muted-foreground">
-                                      {engager.location || 'N/A'}
                                     </span>
                                   </TableCell>
                                   <TableCell className="text-right">
