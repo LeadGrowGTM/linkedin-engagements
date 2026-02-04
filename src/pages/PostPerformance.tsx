@@ -96,32 +96,15 @@ export default function PostPerformance() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          {engagerResult && (
-            <span className={`text-sm ${engagerResult.success ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-              {engagerResult.message}
-            </span>
-          )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={triggerEngagers}
-            disabled={isTriggering}
-            className="gap-2"
-          >
-            <Zap className={`h-4 w-4 ${isTriggering ? 'animate-pulse' : ''}`} />
-            {isTriggering ? 'Triggering...' : 'Scrape Engagers'}
-          </Button>
-          <a
-            href={decodedUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:underline"
-          >
-            <ExternalLink className="h-4 w-4" />
-            View Profile
-          </a>
-        </div>
+        <a
+          href={decodedUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:underline"
+        >
+          <ExternalLink className="h-4 w-4" />
+          View Profile
+        </a>
       </div>
 
       {/* Summary Cards */}
@@ -330,7 +313,12 @@ export default function PostPerformance() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+                    {engagerResult && (
+                      <span className={`text-xs ${engagerResult.success ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                        {engagerResult.message}
+                      </span>
+                    )}
                     <Button
                       variant="outline"
                       size="sm"
@@ -347,6 +335,16 @@ export default function PostPerformance() {
                     >
                       <RefreshCw className={cn("h-4 w-4 mr-2", updatePostStatus.isPending && "animate-spin")} />
                       Scrape Again
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={triggerEngagers}
+                      disabled={isTriggering}
+                      className="gap-1"
+                    >
+                      <Zap className={`h-4 w-4 ${isTriggering ? 'animate-pulse' : ''}`} />
+                      {isTriggering ? 'Triggering...' : 'Scrape Engagers'}
                     </Button>
                   </div>
                 </div>
