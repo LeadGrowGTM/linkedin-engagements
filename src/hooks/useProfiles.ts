@@ -25,38 +25,33 @@ export function useProfileStats() {
   return useQuery({
     queryKey: ['profile-stats'],
     queryFn: async () => {
-      // Get profiles with post counts and engager counts
       const { data: profiles, error: profilesError } = await supabase
         .from('linkedin_profiles')
         .select('*')
 
       if (profilesError) throw profilesError
 
-      // Get post counts for each profile
-      const { data: posts, error: postsError } = await supabase
-        .from('linkedin_posts')
-        .select('profile_url')
-
-      if (postsError) throw postsError
-
-      // Get engager counts (enriched profiles with parent_profile)
-      const { data: engagers, error: engagersError } = await supabase
-        .from('enriched_profiles')
-        .select('parent_profile')
-        .not('parent_profile', 'is', null)
-
-      if (engagersError) throw engagersError
-
-      // Calculate stats for each profile
-      const stats = (profiles || []).map(profile => {
-        const postCount = (posts || []).filter(p => p.profile_url === profile.profile_url).length
-        const engagerCount = (engagers || []).filter(e => e.parent_profile === profile.profile_url).length
-        return {
-          ...profile,
-          postCount,
-          engagerCount,
-        }
-      })
+      // Count posts and engagers per profile using server-side counts
+      // (avoids Supabase default 1000-row limit on bulk fetches)
+      const stats = await Promise.all(
+        (profiles || []).map(async (profile) => {
+          const [{ count: postCount }, { count: engagerCount }] = await Promise.all([
+            supabase
+              .from('linkedin_posts')
+              .select('*', { count: 'exact', head: true })
+              .eq('profile_url', profile.profile_url),
+            supabase
+              .from('enriched_profiles')
+              .select('*', { count: 'exact', head: true })
+              .eq('parent_profile', profile.profile_url),
+          ])
+          return {
+            ...profile,
+            postCount: postCount || 0,
+            engagerCount: engagerCount || 0,
+          }
+        })
+      )
 
       return stats
     },
