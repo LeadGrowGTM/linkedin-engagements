@@ -66,8 +66,26 @@ export function usePushToWebhook() {
         }
       }
 
-      // Format as lead payloads
-      const leads = engagers.map(e => formatLeadPayload(e as LeadData))
+      // Fetch post engagements for all engagers in this profile
+      const engagerUrls = engagers.map(e => e.profile_url)
+      const { data: postEngagements } = await supabase
+        .from('post_engagements')
+        .select('engager_profile_url, post_url, post_text, engagement_type')
+        .in('engager_profile_url', engagerUrls)
+
+      // Group engagements by engager
+      const engagementsByEngager = new Map<string, { post_url: string; post_text: string | null; engagement_type: string | null }[]>()
+      for (const pe of postEngagements || []) {
+        const list = engagementsByEngager.get(pe.engager_profile_url) || []
+        list.push({ post_url: pe.post_url, post_text: pe.post_text, engagement_type: pe.engagement_type })
+        engagementsByEngager.set(pe.engager_profile_url, list)
+      }
+
+      // Format as lead payloads with engagement data
+      const leads = engagers.map(e => formatLeadPayload({
+        ...(e as LeadData),
+        engagements: engagementsByEngager.get(e.profile_url) || [],
+      }))
 
       // Push to each webhook URL via clay-proxy /push/batch
       const batchUrl = proxyUrl.trim().replace(/\/push\/?$/, '/push/batch')

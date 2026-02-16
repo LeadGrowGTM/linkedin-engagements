@@ -33,6 +33,7 @@ export interface LeadData {
   raw_data?: unknown
   engagement_type?: string | null
   engagement_value?: string | null
+  engagements?: { post_url: string; post_text: string | null; engagement_type: string | null }[]
 }
 
 export function formatLeadPayload(lead: LeadData) {
@@ -82,6 +83,7 @@ export function formatLeadPayload(lead: LeadData) {
     // Engagement data
     engagement_type: lead.engagement_type,
     engagement_value: lead.engagement_value,
+    engagements: lead.engagements,
 
     // Metadata
     parent_profile: lead.parent_profile,
