@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ExternalLink, Trash2, Calendar, FileText, BarChart3, Edit2, Save, X, Plus } from 'lucide-react'
+import { ExternalLink, Trash2, Calendar, FileText, BarChart3, Edit2, Save, X, Plus, Send } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
@@ -10,6 +10,8 @@ import { Label } from '@/components/ui/label'
 import { formatDate, formatNumber, parseLinkedInUsername } from '@/lib/utils'
 import { useUpdateProfile, useDeleteProfile } from '@/hooks/useProfiles'
 import { useCategories } from '@/hooks/useCategories'
+import { usePushToWebhook } from '@/hooks/usePushToWebhook'
+import { useToast } from '@/components/ui/toast'
 
 interface ProfileCardProps {
   profile: {
@@ -32,7 +34,16 @@ export default function ProfileCard({ profile, categoryColor }: ProfileCardProps
   const updateProfile = useUpdateProfile()
   const deleteProfile = useDeleteProfile()
   const { data: categories } = useCategories()
+  const { pushProfileEngagers, isPushing: isPushingWebhook } = usePushToWebhook()
+  const { showToast } = useToast()
   const username = parseLinkedInUsername(profile.profile_url)
+
+  const webhookUrls: string[] = (() => {
+    if (profile.webhooks && Array.isArray(profile.webhooks)) return profile.webhooks
+    if (profile.Webhook) return [profile.Webhook]
+    return []
+  })()
+  const hasWebhooks = webhookUrls.filter(u => u && u.trim()).length > 0
 
   const [isEditing, setIsEditing] = useState(false)
   const [editedDescription, setEditedDescription] = useState(profile.description || '')
@@ -65,6 +76,25 @@ export default function ProfileCard({ profile, categoryColor }: ProfileCardProps
         console.error('Error deleting profile:', error)
       }
     }
+  }
+
+  const handlePushToWebhook = async () => {
+    if (!hasWebhooks) {
+      showToast('No webhook URLs configured. Edit the profile to add one.', 'error')
+      return
+    }
+    if (profile.engagerCount === 0) {
+      showToast('No engagers to push for this profile.', 'info')
+      return
+    }
+
+    const confirmed = confirm(
+      `Push ${profile.engagerCount} engager${profile.engagerCount !== 1 ? 's' : ''} to ${webhookUrls.length} webhook${webhookUrls.length !== 1 ? 's' : ''}?`
+    )
+    if (!confirmed) return
+
+    const result = await pushProfileEngagers(profile.profile_url, webhookUrls)
+    showToast(result.message, result.success ? 'success' : 'error')
   }
 
   const handleSaveEdits = async () => {
@@ -317,6 +347,18 @@ export default function ProfileCard({ profile, categoryColor }: ProfileCardProps
             >
               <BarChart3 className="h-4 w-4" />
             </Button>
+            {hasWebhooks && (
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={handlePushToWebhook}
+                disabled={isPushingWebhook || profile.engagerCount === 0}
+                title={`Push ${profile.engagerCount} engagers to webhook`}
+                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950"
+              >
+                <Send className={`h-4 w-4 ${isPushingWebhook ? 'animate-pulse' : ''}`} />
+              </Button>
+            )}
             <Button
               size="icon"
               variant="ghost"
