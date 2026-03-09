@@ -36,6 +36,7 @@ app.get('/', (req, res) => {
       'PATCH /api/profiles/:profileUrl',
       'DELETE /api/profiles/:profileUrl',
       'POST /api/scrape/posts',
+      'POST /api/scrape/direct',
       'POST /api/scrape/engagers',
       'GET  /api/engagers',
       'GET  /api/engagers/:profileUrl',
