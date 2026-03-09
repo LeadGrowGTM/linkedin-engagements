@@ -97,10 +97,12 @@ router.post('/engagers', async (req, res, next) => {
 
 // POST /api/scrape/direct - Scrape recent posts for a single profile (synchronous)
 // Does NOT require the profile to be in the monitoring list.
-// Body: { "profile_url": "https://www.linkedin.com/in/...", "limit": 3 }
+// Body: { "profile_url": "https://www.linkedin.com/in/...", "limit": 3, "min_date": "2026-01-01" }
+// min_date: optional ISO date string — only return posts on or after this date
 router.post('/direct', async (req, res, next) => {
   try {
-    const { profile_url, limit = 3 } = req.body;
+    const { profile_url, limit = 3, min_date } = req.body;
+    const minDateFilter = min_date ? new Date(min_date) : null;
 
     if (!profile_url) {
       return res.status(400).json({ success: false, error: 'profile_url is required' });
@@ -134,9 +136,13 @@ router.post('/direct', async (req, res, next) => {
 
     const items = await apifyRes.json();
 
-    // Filter out reposts
+    // Filter out reposts + apply date filter
     const posts = (items || [])
       .filter((item) => item.post_type !== 'repost')
+      .filter((item) => {
+        if (!minDateFilter || !item.postedAtTimestamp) return true;
+        return new Date(item.postedAtTimestamp) >= minDateFilter;
+      })
       .slice(0, limit);
 
     // Save to DB (upsert by post_url)
