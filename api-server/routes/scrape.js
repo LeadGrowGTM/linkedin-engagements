@@ -114,15 +114,19 @@ router.post('/direct', async (req, res, next) => {
 
     // Call Apify synchronously
     const url = `${APIFY_BASE}/supreme_coder~linkedin-post/run-sync-get-dataset-items?token=${APIFY_TOKEN}&timeout=120`;
+    const apifyInput = {
+      deepScrape: true,
+      limitPerSource: Math.min(limit, 10),
+      rawData: false,
+      urls: [profile_url],
+    };
+    if (min_date) {
+      apifyInput.scrapeUntil = min_date; // e.g. "2026-01-01" — stops scraping at this date
+    }
     const apifyRes = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        deepScrape: true,
-        limitPerSource: Math.min(limit, 10),
-        rawData: false,
-        urls: [profile_url],
-      }),
+      body: JSON.stringify(apifyInput),
     });
 
     if (!apifyRes.ok) {
