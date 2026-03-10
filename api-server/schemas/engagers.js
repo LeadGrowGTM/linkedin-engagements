@@ -2,7 +2,7 @@ const { z } = require('zod');
 
 const engagerQuerySchema = z.object({
   parent_profile: z.string().optional(),
-  days: z.coerce.number().int().min(1).max(365).optional().default(30),
+  days: z.coerce.number().int().min(1).max(365).optional(),
   min_score: z.coerce.number().int().min(0).max(100).optional(),
   lead_status: z.enum(['hot', 'warm', 'cold']).optional(),
   industry: z.string().optional(),

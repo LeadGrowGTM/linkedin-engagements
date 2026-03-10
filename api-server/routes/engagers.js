@@ -23,10 +23,12 @@ router.get('/', validate(engagerQuerySchema, 'query'), async (req, res, next) =>
       query = query.eq('parent_profile', parent_profile);
     }
 
-    // Time range filter
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - days);
-    query = query.gte('created_at', cutoff.toISOString());
+    // Time range filter (only if days specified)
+    if (days) {
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - days);
+      query = query.gte('created_at', cutoff.toISOString());
+    }
 
     if (industry) query = query.ilike('company_industry', `%${industry}%`);
     if (location) query = query.ilike('location', `%${location}%`);
