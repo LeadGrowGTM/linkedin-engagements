@@ -74,68 +74,66 @@ router.get('/', validate(engagerQuerySchema, 'query'), async (req, res, next) =>
       }
     }
 
-    if (webhookUrls.length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'No webhook configured. Provide ?webhook=<url> or set webhooks on the profile.',
-      });
-    }
+    // Deliver to webhooks (only if webhooks are configured)
+    let webhookResults = null;
+    if (webhookUrls.length > 0) {
+      webhookResults = { total_sent: 0, successful: 0, failed: 0, errors: [] };
 
-    // Deliver to webhooks
-    const webhookResults = { total_sent: 0, successful: 0, failed: 0, errors: [] };
+      for (const engager of page) {
+        const payload = formatLeadPayload(engager, {
+          lead_score: engager.lead_score,
+          lead_status: engager.lead_status,
+        });
 
-    for (const engager of page) {
-      const payload = formatLeadPayload(engager, {
-        lead_score: engager.lead_score,
-        lead_status: engager.lead_status,
-      });
-
-      for (const url of webhookUrls) {
-        webhookResults.total_sent++;
-        const result = await deliverToWebhook(url, payload);
-        if (result.success) {
-          webhookResults.successful++;
-        } else {
-          webhookResults.failed++;
-          webhookResults.errors.push(
-            `${engager.full_name || engager.profile_url}: ${result.error}`
-          );
+        for (const url of webhookUrls) {
+          webhookResults.total_sent++;
+          const result = await deliverToWebhook(url, payload);
+          if (result.success) {
+            webhookResults.successful++;
+          } else {
+            webhookResults.failed++;
+            webhookResults.errors.push(
+              `${engager.full_name || engager.profile_url}: ${result.error}`
+            );
+          }
         }
+      }
+
+      // Cap errors in response
+      if (webhookResults.errors.length > 10) {
+        webhookResults.errors = webhookResults.errors.slice(0, 10);
+        webhookResults.errors.push('... and more');
       }
     }
 
-    // Cap errors in response
-    if (webhookResults.errors.length > 10) {
-      webhookResults.errors = webhookResults.errors.slice(0, 10);
-      webhookResults.errors.push('... and more');
-    }
+    const formatEngager = (e) => ({
+      profile_url: e.profile_url,
+      full_name: e.full_name,
+      headline: e.headline,
+      company_name: e.company_name,
+      company_industry: e.company_industry,
+      company_size: e.company_size,
+      location: e.location,
+      connections: e.connections,
+      followers: e.followers,
+      lead_score: e.lead_score,
+      lead_status: e.lead_status,
+      engagement_type: e.engagement_type,
+      parent_profile: e.parent_profile,
+      created_at: e.created_at,
+    });
 
     const response = {
       success: true,
       count: total,
       page_size: page.length,
       offset,
-      webhook_urls: webhookUrls,
-      webhook_results: webhookResults,
+      data: page.map(formatEngager),
     };
 
-    if (include_data === 'true') {
-      response.data = page.map(e => ({
-        profile_url: e.profile_url,
-        full_name: e.full_name,
-        headline: e.headline,
-        company_name: e.company_name,
-        company_industry: e.company_industry,
-        company_size: e.company_size,
-        location: e.location,
-        connections: e.connections,
-        followers: e.followers,
-        lead_score: e.lead_score,
-        lead_status: e.lead_status,
-        engagement_type: e.engagement_type,
-        parent_profile: e.parent_profile,
-        created_at: e.created_at,
-      }));
+    if (webhookUrls.length > 0) {
+      response.webhook_urls = webhookUrls;
+      response.webhook_results = webhookResults;
     }
 
     res.json(response);
