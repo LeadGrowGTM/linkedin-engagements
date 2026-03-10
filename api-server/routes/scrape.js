@@ -1,202 +1,126 @@
 const { Router } = require('express');
 const { supabase } = require('../lib/supabase');
+const { scrapePosts } = require('../lib/apify');
+const { processEngagers, runFullPipeline, savePosts } = require('../lib/pipeline');
 
 const router = Router();
 
-const APIFY_TOKEN = process.env.APIFY_TOKEN;
-const APIFY_BASE = 'https://api.apify.com/v2/acts';
-
-const N8N_POSTS_WEBHOOK = process.env.N8N_SCRAPE_POSTS_WEBHOOK
-  || 'https://lgn8nwebhookv2.up.railway.app/hook/linkedin-scrape-posts';
-const N8N_ENGAGERS_WEBHOOK = process.env.N8N_SCRAPE_ENGAGERS_WEBHOOK
-  || 'https://lgn8nwebhookv2.up.railway.app/hook/linkedin-scrape-engagers';
-
-async function triggerN8n(webhookUrl, extra = {}) {
-  const payload = { trigger: 'api', timestamp: new Date().toISOString(), ...extra };
-
-  const response = await fetch(webhookUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-    signal: AbortSignal.timeout(15000),
-  });
-
-  if (!response.ok) {
-    const text = await response.text().catch(() => '');
-    return { success: false, status: response.status, error: text || `HTTP ${response.status}` };
-  }
-
-  return { success: true, status: response.status };
-}
-
-// POST /api/scrape/posts - Trigger Part 1 (post scraping)
+// POST /api/scrape/posts - Scrape posts for one or all enabled profiles
 router.post('/posts', async (req, res, next) => {
   try {
-    const extra = {};
-    if (req.body.profile_url) extra.profile_url = req.body.profile_url;
+    const { profile_url, limit = 3, min_date } = req.body;
 
-    const result = await triggerN8n(N8N_POSTS_WEBHOOK, extra);
-
-    if (!result.success) {
-      return res.status(502).json({
-        success: false,
-        error: 'Failed to trigger n8n workflow',
-        details: result.error,
-      });
+    let profiles;
+    if (profile_url) {
+      profiles = [{ profile_url }];
+    } else {
+      const { data, error } = await supabase
+        .from('linkedin_profiles')
+        .select('profile_url')
+        .eq('is_enabled', true);
+      if (error) throw error;
+      profiles = data || [];
     }
+
+    if (profiles.length === 0) {
+      return res.json({ success: true, message: 'No enabled profiles found', results: [] });
+    }
+
+    const results = [];
+    for (const profile of profiles) {
+      try {
+        const rawPosts = await scrapePosts(profile.profile_url, { limit, minDate: min_date });
+        const saved = await savePosts(rawPosts, profile.profile_url);
+        results.push({
+          profile_url: profile.profile_url,
+          posts_scraped: saved.length,
+        });
+      } catch (err) {
+        results.push({
+          profile_url: profile.profile_url,
+          error: err.message,
+        });
+      }
+    }
+
+    const totalPosts = results.reduce((sum, r) => sum + (r.posts_scraped || 0), 0);
 
     res.json({
       success: true,
-      message: 'Post scraping workflow triggered',
-      workflow: 'Part 1 - Scrape Profiles',
-      triggered_at: new Date().toISOString(),
+      profiles_processed: profiles.length,
+      total_posts_scraped: totalPosts,
+      results,
     });
   } catch (err) {
-    if (err.name === 'TimeoutError') {
-      return res.status(504).json({
-        success: false,
-        error: 'n8n webhook timed out',
-      });
-    }
     next(err);
   }
 });
 
-// POST /api/scrape/engagers - Trigger Part 2 (engager scraping)
+// POST /api/scrape/engagers - Scrape engagers for pending posts
 router.post('/engagers', async (req, res, next) => {
   try {
-    const extra = {};
-    if (req.body.post_url) extra.post_url = req.body.post_url;
+    const { post_url, profile_url } = req.body;
 
-    const result = await triggerN8n(N8N_ENGAGERS_WEBHOOK, extra);
+    const options = {};
+    if (post_url) options.postUrls = [post_url];
+    if (profile_url) options.profileUrl = profile_url;
 
-    if (!result.success) {
-      return res.status(502).json({
-        success: false,
-        error: 'Failed to trigger n8n workflow',
-        details: result.error,
-      });
-    }
+    const result = await processEngagers(options);
 
     res.json({
       success: true,
-      message: 'Engager scraping workflow triggered',
-      workflow: 'Part 2 - Scrape Engagers',
-      triggered_at: new Date().toISOString(),
+      ...result,
     });
   } catch (err) {
-    if (err.name === 'TimeoutError') {
-      return res.status(504).json({
-        success: false,
-        error: 'n8n webhook timed out',
-      });
-    }
     next(err);
   }
 });
 
-// POST /api/scrape/direct - Scrape recent posts for a single profile (synchronous)
-// Does NOT require the profile to be in the monitoring list.
-// Body: { "profile_url": "https://www.linkedin.com/in/...", "limit": 3, "min_date": "2026-01-01" }
-// min_date: optional ISO date string — only return posts on or after this date
-router.post('/direct', async (req, res, next) => {
+// POST /api/scrape/pipeline - Full pipeline: scrape posts + engagers + enrich for a single profile
+router.post('/pipeline', async (req, res, next) => {
   try {
-    const { profile_url, limit = 3, min_date } = req.body;
-    const minDateFilter = min_date ? new Date(min_date) : null;
+    const { profile_url, limit = 5, min_date } = req.body;
 
     if (!profile_url) {
       return res.status(400).json({ success: false, error: 'profile_url is required' });
     }
 
-    if (!APIFY_TOKEN) {
-      return res.status(500).json({ success: false, error: 'APIFY_TOKEN not configured' });
-    }
+    const result = await runFullPipeline(profile_url, { limit, minDate: min_date });
 
-    // Call Apify synchronously
-    const url = `${APIFY_BASE}/supreme_coder~linkedin-post/run-sync-get-dataset-items?token=${APIFY_TOKEN}&timeout=120`;
-    const apifyInput = {
-      deepScrape: true,
-      limitPerSource: Math.min(limit, 10),
-      rawData: false,
-      urls: [profile_url],
-    };
-    if (min_date) {
-      apifyInput.scrapeUntil = min_date; // e.g. "2026-01-01" — stops scraping at this date
-    }
-    const apifyRes = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(apifyInput),
+    res.json({
+      success: true,
+      profile_url,
+      ...result,
     });
+  } catch (err) {
+    next(err);
+  }
+});
 
-    if (!apifyRes.ok) {
-      const text = await apifyRes.text().catch(() => '');
-      return res.status(502).json({
-        success: false,
-        error: `Apify scrape failed (${apifyRes.status})`,
-        details: text.slice(0, 300),
-      });
+// POST /api/scrape/direct - Scrape recent posts for a single profile (kept for backward compat)
+router.post('/direct', async (req, res, next) => {
+  try {
+    const { profile_url, limit = 3, min_date } = req.body;
+
+    if (!profile_url) {
+      return res.status(400).json({ success: false, error: 'profile_url is required' });
     }
 
-    const items = await apifyRes.json();
+    const rawPosts = await scrapePosts(profile_url, { limit, minDate: min_date });
+    const saved = await savePosts(rawPosts, profile_url);
 
-    // Filter out reposts + apply date filter
-    const posts = (items || [])
-      .filter((item) => item.post_type !== 'repost')
-      .filter((item) => {
-        if (!minDateFilter || !item.postedAtTimestamp) return true;
-        return new Date(item.postedAtTimestamp) >= minDateFilter;
-      })
-      .slice(0, limit);
-
-    // Save to DB (upsert by post_url)
-    const saved = [];
-    for (const post of posts) {
-      if (!post.url) continue;
-
-      const postId = post.urn ? post.urn.split(':').pop() : null;
-      const postedAt = post.postedAtTimestamp
-        ? new Date(post.postedAtTimestamp).toISOString()
-        : null;
-
-      const record = {
-        post_url: post.url,
-        profile_url: post.inputUrl || profile_url,
-        post_text: post.text || null,
-        posted_at_timestamp: postedAt,
-        post_id: postId,
-        status: 'COMPLETED',
-      };
-
-      const { data: existing } = await supabase
-        .from('linkedin_posts')
-        .select('id')
-        .eq('post_url', post.url)
-        .maybeSingle();
-
-      if (existing) {
-        await supabase
-          .from('linkedin_posts')
-          .update({ post_text: record.post_text, posted_at_timestamp: postedAt, updated_at: new Date().toISOString() })
-          .eq('post_url', post.url);
-      } else {
-        await supabase.from('linkedin_posts').insert(record);
-      }
-
-      saved.push({
-        post_url: post.url,
-        post_text: post.text || null,
-        posted_at: postedAt,
-        post_type: post.post_type || null,
-      });
-    }
-
+    // Map to the existing response format
     res.json({
       success: true,
       profile_url,
       post_count: saved.length,
       has_recent_posts: saved.length > 0,
-      posts: saved,
+      posts: saved.map(p => ({
+        post_url: p.post_url,
+        post_text: p.post_text,
+        posted_at: p.posted_at_timestamp,
+        post_type: null,
+      })),
     });
   } catch (err) {
     next(err);
